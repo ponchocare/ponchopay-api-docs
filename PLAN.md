@@ -183,9 +183,14 @@ Deliberate differences kept, because the code shows Notion was wrong or incomple
 - **Recurring payment cancel**: also possible through the Cancel a subscription endpoint, not just
   the admin.
 - **Mark in bank on demo**: Notion says it "can only be triggered on complete payments". The admin
-  shows it for completed and reported-complete payments, card payments and late payments, when
-  reconciliation is on (`MarkInBank.svelte`). The site says so, which is what makes Standard TFC
-  and voucher `payment_completed` testable on demo.
+  offers it for completed, reported-complete and late payments when reconciliation is on
+  (`MarkInBank.svelte`), and card payment methods can't be marked
+  (`CardSubsidyCannotBeMarkedInBankError`). The site says so, which is what makes Standard TFC and
+  voucher `payment_completed` testable on demo.
+- **Update a payment method type changes**: only between `tax-free-childcare` and
+  `childcare-voucher` (`validateSchemeChange` in `src/be/subsidy/manager.ts`). A type change cancels
+  the old payment method and creates a new one with a new ID, which `payment_updated` reports.
+  Notion is silent; the update page and examples now follow the code.
 - **Endpoint headers** show paths relative to the documented base URL (`…/api/`); the full URLs
   underneath are unchanged.
 

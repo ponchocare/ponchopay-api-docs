@@ -47,10 +47,10 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
      guarantee is turned off.
   2. [`payment_reported_complete`](/webhooks/events/payment-reported-complete/): the parent says
      they've paid outside PonchoPay, with Standard Tax-Free Childcare or vouchers. It's their claim,
-     backed by the card guarantee.
+     backed by the card guarantee if payment guarantee is turned on.
   3. [`payment_completed`](/webhooks/events/payment-completed/): the payment is done. For Standard
      Tax-Free Childcare and vouchers this only comes once PonchoPay finds the money in the bank,
-     which can be 2 or more days later.
+     which can be 2 or more days later because of voucher providers' payment terms.
   4. [`payment_in_bank`](/webhooks/events/payment-in-bank/): PonchoPay found the payment in the
      provider's bank account. Not available for every payment.
 
@@ -62,7 +62,7 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
   Integrations set up before 25 April 2025 may still use the old lifecycle, which has no
   `payment_reported_complete`. In it, `payment_completed` is sent as soon as the parent reports a
   Standard Tax-Free Childcare or voucher payment as paid, not when the money is confirmed. The card
-  pre-authorisation acts as a backup in this case. To move
+  pre-authorisation acts as a backup in this case, if payment guarantee is turned on. To move
   to the current lifecycle, email [support@ponchopay.com](mailto:support@ponchopay.com).
 
   </details>

@@ -55,20 +55,24 @@ on your laptop, use a tunnelling tool such as ngrok or Cloudflare Tunnel.
 
 | Webhook                                                                      | How to trigger it on demo                                                                                                                                         |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`payment_captured`](/webhooks/events/payment-captured/)                     | Pay by card or Pay by Bank in checkout, or enter card details for the guarantee on a Standard Tax-Free Childcare or voucher payment. |
+| [`payment_captured`](/webhooks/events/payment-captured/)                     | With payment guarantee turned on, pay by card, Pay by Bank or Express Tax-Free Childcare in checkout, or enter card details for the guarantee on a Standard Tax-Free Childcare or voucher payment. |
 | [`payment_reported_complete`](/webhooks/events/payment-reported-complete/)   | Pay with Standard Tax-Free Childcare or vouchers and report the payment as complete in checkout.                                                                   |
 | [`payment_completed`](/webhooks/events/payment-completed/)                   | Sent automatically once the payment is complete. Card, Pay by Bank and Express Tax-Free Childcare payments: finish checkout. Standard Tax-Free Childcare and vouchers: report the payment as complete in checkout, then mark it in bank (below). |
-| [`payment_in_bank`](/webhooks/events/payment-in-bank/)                       | In production this is sent when bank reconciliation runs. On demo, simulate it: on the [payments page](https://demo.ponchopay.com/provider/admin/payments), use **Mark in bank** at the end of the row. It's available for completed and reported-complete payments, and card payments, when reconciliation is turned on. |
-| [`payment_refunded`](/webhooks/events/payment-refunded/)                     | [Refund a payment method](/endpoints/refund-payment-method/), or refund from the admin.                                                                            |
-| [`payment_cancelled`](/webhooks/events/payment-cancelled/)                   | [Cancel the payment](/endpoints/cancel-payment/), or cancel it in the admin.                                                                                       |
+| [`payment_in_bank`](/webhooks/events/payment-in-bank/)                       | In production this is sent when bank reconciliation runs. On demo, simulate it: on the [payments page](https://demo.ponchopay.com/provider/admin/payments), use **Mark in bank** at the end of the row. It's available for completed, reported-complete and late payments when reconciliation is turned on. Card payment methods can't be marked in bank. |
+| [`payment_refunded`](/webhooks/events/payment-refunded/)                     | Pay by card, then [refund the payment method](/endpoints/refund-payment-method/) or refund it from the admin. |
+| [`payment_cancelled`](/webhooks/events/payment-cancelled/)                   | Select a payment method in checkout without finishing, then [cancel the payment](/endpoints/cancel-payment/) or cancel it in the admin. No webhook is sent if no payment method was selected. |
+| [`payment_updated`](/webhooks/events/payment-updated/)                       | [Update a payment method](/endpoints/update-payment-method/), or change it in the admin. |
+| [`recurring_payment_captured`](/webhooks/events/recurring-payment-captured/) | With payment guarantee turned on, [initiate a subscription](/endpoints/initiate-subscription/), choose Tax-Free Childcare or vouchers, and complete the card pre-authorisation. |
+| [`recurring_payment_set_up`](/webhooks/events/recurring-payment-set-up/)     | [Initiate a subscription](/endpoints/initiate-subscription/) and finish setting it up. |
+| [`recurring_payment_cancel`](/webhooks/events/recurring-payment-cancel/)     | Set up a recurring payment, then [cancel it](/endpoints/cancel-subscription/) or cancel it in the admin. |
 
 ## Before you go live
 
 Run at least these tests, and check both the PonchoPay admin and your own system each time:
 
 - [ ] A card payment. Check every webhook arrives and is handled.
-- [ ] A Tax-Free Childcare payment. Check the webhooks.
-- [ ] A childcare voucher payment. Check the webhooks.
+- [ ] A Tax-Free Childcare payment. Check every webhook arrives and is handled.
+- [ ] A childcare voucher payment. Check every webhook arrives and is handled.
 - [ ] A voucher payment where the parent enters their card but doesn't finish checkout.
       `payment_completed` must not be sent.
 - [ ] A Tax-Free Childcare payment where the parent enters their card but doesn't finish

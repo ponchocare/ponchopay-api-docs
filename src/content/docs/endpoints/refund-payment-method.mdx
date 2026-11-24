@@ -123,6 +123,8 @@ import Example from '../../../components/Example.astro';
   | `400` | `Unable to refund payment method.` | The payment method isn't a card payment method. |
   | `409` | `A refund is already in progress. Please wait for it to complete.` | Wait for the earlier refund's webhook, then try again. |
 
+  An invalid or expired token is rejected before any of these checks.
+
   <Fragment slot="code">
     ```http title="Response"
     HTTP/1.1 204 No Content

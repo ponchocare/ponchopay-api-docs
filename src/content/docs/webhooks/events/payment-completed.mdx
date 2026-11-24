@@ -24,14 +24,15 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
     [`payment_captured`](/webhooks/events/payment-captured/) is sent at the same time, unless
     payment guarantee is turned off.
   - **Offline payments, such as Standard Tax-Free Childcare or childcare vouchers**: once PonchoPay
-    has confirmed the payment is in the provider's bank. This can be 2 or more days after checkout, depending on the scheme's
+    has confirmed the payment is in the provider's bank. This can be 2 or more days after checkout, because of voucher providers'
     payment terms.
 
   <Aside title="Parents paying outside PonchoPay">
     With Standard Tax-Free Childcare and childcare vouchers, the parent pays on the government's or
     voucher provider's site. When they tell PonchoPay they've paid, you get
     [`payment_reported_complete`](/webhooks/events/payment-reported-complete/). That's the parent's
-    claim, backed by the card they left as a guarantee. `payment_completed` only follows once the
+    claim, backed by the card they left as a guarantee if payment guarantee is turned on.
+    `payment_completed` only follows once the
     money is confirmed.
   </Aside>
 

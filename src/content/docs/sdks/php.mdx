@@ -234,7 +234,18 @@ checks the `signature` header with `hash_hmac` and `hash_equals`, then parses th
   | `$client->cancelPayment(string $paymentId, array $payload)` | `void` | [Cancel a payment](/endpoints/cancel-payment/) |
   | `$client->cancelRecursion(string $recursionId, array $payload)` | `void` | [Cancel a subscription](/endpoints/cancel-subscription/) |
   | `PonchoPay\createToken(string $key, string $metadata)` | `string`: initiation token | [Initiation token](/getting-started/authentication/#initiation-token) |
-  | `PonchoPay\createJWT(string $urn, string $key, string $email, string $data)` | `string`: management JWT, valid for 5 seconds | [Management JWT](/getting-started/authentication/#management-jwt) |
+  | `PonchoPay\createJWT(string $urn, string $key, string $email, string $data)` | `string`: management JWT, valid for 5 seconds. `$data` is the body to be sent (`''` when there's none) | [Management JWT](/getting-started/authentication/#management-jwt) |
+
+  Parameter types:
+
+  - `$init`: the [Initiate a payment](/endpoints/initiate-payment/) or
+    [Initiate a subscription](/endpoints/initiate-subscription/) parameters without `token`, as an
+    associative array.
+  - `$payload`: `['urn' => string, 'email' => string]`. `urn` is the location's Unique Reference
+    Number. `email` is who authored the request, and doesn't need to be a PonchoPay user.
+  - `$update`: `$payload` plus the [Update a payment method](/endpoints/update-payment-method/) body.
+  - `$refund`: `$payload` plus `amount`, as in
+    [Refund a payment method](/endpoints/refund-payment-method/).
 
   <Aside title="Telemetry">
     Every request includes an `x-telemetry` header with the SDK's name and version and your PHP

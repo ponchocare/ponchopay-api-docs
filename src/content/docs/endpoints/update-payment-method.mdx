@@ -21,7 +21,10 @@ import Example from '../../../components/Example.astro';
   how a payment was split, for example when a parent paid part of an invoice with vouchers instead
   of Tax-Free Childcare.
 
-  PonchoPay sends [`payment_updated`](/webhooks/events/payment-updated/) after the change.
+  The type can only change between `tax-free-childcare` and `childcare-voucher`. Changing the type
+  cancels the old payment method and creates a new one with a new ID, which the
+  [`payment_updated`](/webhooks/events/payment-updated/) webhook reports. PonchoPay sends
+  `payment_updated` after any change.
 
   <Fragment slot="code">
     <Endpoint method="PUT" path="/api/payment-method/{paymentMethodId}" />
@@ -67,7 +70,7 @@ import Example from '../../../components/Example.astro';
         const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
         // Demo: new Client(key, 'https://demo.ponchopay.com/')
 
-        await client.updatePaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', {
+        await client.updatePaymentMethod('c4e6a8b0-1d3f-4b5c-8e7a-9f2d4b6c8e13', {
           urn: 'INTTEST',
           email: 'admin@club.example.com',
           type: PaymentMethodType.ChildcareVouchers, // 'childcare-voucher'
@@ -85,7 +88,7 @@ import Example from '../../../components/Example.astro';
         $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
         // Demo: new Client($key, 'https://demo.ponchopay.com/')
 
-        $client->updatePaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', [
+        $client->updatePaymentMethod('c4e6a8b0-1d3f-4b5c-8e7a-9f2d4b6c8e13', [
             'urn' => 'INTTEST',
             'email' => 'admin@club.example.com',
             'type' => 'childcare-voucher',
@@ -97,7 +100,7 @@ import Example from '../../../components/Example.astro';
       <TabItem label="cURL">
         ```bash
         # $JWT: a management JWT whose sig is computed from exactly this body
-        curl -X PUT https://demo.ponchopay.com/api/payment-method/a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20 \
+        curl -X PUT https://demo.ponchopay.com/api/payment-method/c4e6a8b0-1d3f-4b5c-8e7a-9f2d4b6c8e13 \
           -H "Authorization: Bearer $JWT" \
           -H 'Content-Type: application/json' \
           -d '{"type":"childcare-voucher","amount":4274,"voucher_provider":"cooperating_helping_4ever"}'
@@ -120,7 +123,7 @@ import Example from '../../../components/Example.astro';
   | --- | --- |
   | `Invalid amount` | `amount` isn't valid for this payment. |
   | `Invalid scheme` | `type` isn't one of `card`, `childcare-voucher` or `tax-free-childcare`. |
-  | `Invalid scheme change` | The payment method can't be changed to that type. |
+  | `Invalid scheme change` | The type can only change between `tax-free-childcare` and `childcare-voucher`. |
   | `Voucher provider missing` | `type` is `childcare-voucher` but there's no `voucher_provider`. |
   | `Invalid data` | The payment method isn't a voucher payment, so it can't take voucher details. |
   | `Invalid update` | The payment method is already in bank and can't be changed. |

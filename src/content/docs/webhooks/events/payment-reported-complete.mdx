@@ -20,7 +20,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   vouchers. They pay on the government's or the voucher provider's site, so PonchoPay can't see the
   payment yet.
 
-  This is the parent's claim, not proof. The card they left as a guarantee backs it up. When
+  This is the parent's claim, not proof. If payment guarantee is turned on, the card they left as a guarantee backs it up. When
   PonchoPay finds the money in the provider's bank, you get
   [`payment_completed`](/webhooks/events/payment-completed/).
 

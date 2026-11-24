@@ -64,11 +64,11 @@ import Example from '../../../components/Example.astro';
         app.post('/ponchopay/subscription-set-up', express.urlencoded({ extended: false }), (req, res) => {
           const { metadata, provider_redirect } = req.body;
 
-          // Look up by metadata to show status. Don't mark it paid here: wait for the webhook.
+          // Look up by metadata to show status. Don't mark it active here: wait for the webhook.
           if (provider_redirect && isKnownProviderUrl(provider_redirect)) {
             return res.redirect(303, provider_redirect);
           }
-          res.redirect(303, `/orders/${encodeURIComponent(metadata)}`);
+          res.redirect(303, `/memberships/${encodeURIComponent(metadata)}`);
         });
         ```
       </TabItem>
@@ -79,12 +79,12 @@ import Example from '../../../components/Example.astro';
         $metadata = $_POST['metadata'] ?? '';
         $providerRedirect = $_POST['provider_redirect'] ?? null;
 
-        // Look up by metadata to show status. Don't mark it paid here: wait for the webhook.
+        // Look up by metadata to show status. Don't mark it active here: wait for the webhook.
         if ($providerRedirect && isKnownProviderUrl($providerRedirect)) {
             header('Location: ' . $providerRedirect, true, 303);
             exit;
         }
-        header('Location: /orders/' . rawurlencode($metadata), true, 303);
+        header('Location: /memberships/' . rawurlencode($metadata), true, 303);
         ```
       </TabItem>
     </Tabs>

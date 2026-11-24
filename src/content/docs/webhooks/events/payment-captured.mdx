@@ -1,6 +1,6 @@
 ---
 title: Payment captured
-description: "The payment_captured webhook. Sent when the parent finishes card checkout or leaves a card as a guarantee."
+description: "The payment_captured webhook. Sent when the parent pays by card, Pay by Bank or Express Tax-Free Childcare, or leaves a card as a guarantee. Not sent if payment guarantee is turned off."
 tableOfContents: false
 sidebar:
   order: 1
@@ -16,9 +16,9 @@ import Example from '../../../../components/Example.astro';
 import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
 <ApiColumns>
-  Sent when the payment details have been captured: the parent made a card or Pay by Bank payment,
-  or completed the
-  card pre-authorisation for a Tax-Free Childcare or voucher payment. From this point the payment can
+  Sent when the payment details have been captured: the parent made a card, Pay by Bank or Express
+  Tax-Free Childcare payment, or completed the card pre-authorisation for a Standard Tax-Free
+  Childcare or voucher payment. From this point the payment can
   be guaranteed even if the parent abandons it midway, if the payment guarantee option is selected
   in your settings.
 
@@ -59,7 +59,8 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 ## Test it
 
 <ApiColumns>
-  On the demo environment, [initiate a payment](/endpoints/initiate-payment/) and enter a
+  On the demo environment, with payment guarantee turned on in your settings,
+  [initiate a payment](/endpoints/initiate-payment/) and enter a
   [test card](/getting-started/testing/#test-cards) in checkout.
 
   See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.

@@ -189,7 +189,7 @@ export const schemas = {
         example: 'payment_completed',
         description: 'Which event this is.',
         enum: [
-          { value: 'payment_captured', description: 'The parent made a card or Pay by Bank payment, or completed the card pre-authorisation for a Tax-Free Childcare or voucher payment. Not sent if payment guarantee is turned off.' },
+          { value: 'payment_captured', description: 'The parent made a card, Pay by Bank or Express Tax-Free Childcare payment, or completed the card pre-authorisation for a Standard Tax-Free Childcare or voucher payment. Not sent if payment guarantee is turned off.' },
           { value: 'payment_updated', description: 'The amount or a payment method changed.' },
           { value: 'payment_reported_complete', description: "The parent says they've paid outside PonchoPay." },
           { value: 'payment_completed', description: "The payment is done and the money will reach the provider." },
@@ -569,7 +569,7 @@ export const schemas = {
         name: 'note',
         type: 'string',
         example: 'After-school club, autumn term',
-        description: 'Text attached to the recurring payment and shown with it.',
+        description: 'Text attached to the recurring payment.',
       },
       {
         name: 'repetition',
@@ -706,7 +706,7 @@ export const schemas = {
         name: 'expiry',
         type: 'string',
         description:
-          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details. Once a payment has expired, nothing more can be done with it.',
+          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details (you get the [`payment_captured`](/webhooks/events/payment-captured/) webhook when they do, if payment guarantee is turned on). Once a payment has expired, nothing more can be done with it.',
       },
       {
         name: 'constraints',
@@ -728,7 +728,7 @@ export const schemas = {
         required: true,
         example: 'childcare-voucher',
         description:
-          'The payment method type. These names differ from the ones in webhooks (`credit_debit_card`, `childcare_vouchers`, `tax_free_childcare`).',
+          'The payment method type. These names differ from the ones in webhooks (`credit_debit_card`, `childcare_vouchers`, `tax_free_childcare`). The type can only change between `tax-free-childcare` and `childcare-voucher`; changing it gives the payment method a new ID.',
         enum: [
           { value: 'card', description: 'Card, including Apple Pay, Google Pay, Klarna and Pay by Bank.' },
           { value: 'childcare-voucher', description: 'Childcare vouchers. Send `voucher_provider` too.' },

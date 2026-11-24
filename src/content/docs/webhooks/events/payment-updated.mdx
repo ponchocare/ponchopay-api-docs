@@ -22,7 +22,8 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
   The body has an extra `updates` field listing what changed, as JSON paths into the body, such as
   `$.payment.amount` or `$.payment.payment_methods[0]`. Update your copy of the payment from the
-  `payment` object.
+  `payment` object. If a payment method's type changed, it has a new ID: the old payment method
+  is cancelled and replaced.
 
   <Fragment slot="code">
     <Event name="payment_updated" setting="Payment updated" />
@@ -38,7 +39,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   <Fields schema="PaymentCallback" />
 
   <Fragment slot="code">
-    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_updated', updates: ['$.payment.payment_methods[0]'], 'payment.method': 'childcare_vouchers', 'payment.payment_methods.0.type': 'childcare_vouchers', 'payment.payment_methods.0.variant': 'cooperating_helping_4ever' }} />
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_updated', updates: ['$.payment.payment_methods[0]'], 'payment.method': 'childcare_vouchers', 'payment.payment_methods.0.type': 'childcare_vouchers', 'payment.payment_methods.0.variant': 'cooperating_helping_4ever', 'payment.payment_methods.0.id': 'd8f0b2c4-6e1a-4c3b-9d5f-7a2c4e6b8d20' }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     payment.
   </Fragment>
