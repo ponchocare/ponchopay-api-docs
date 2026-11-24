@@ -120,6 +120,7 @@ import Example from '../../../components/Example.astro';
   | `400` | `The refund amount must be greater than 0.` | `amount` is `0` or less. |
   | `400` | `Requested refund amount exceeds the refundable amount.` | `amount` is more than what's left to refund. |
   | `400` | `A card payment was expected but it could not be found.` | The payment method has no card payment to refund. |
+  | `400` | `Original card payment reference could not be located.` | The original card payment can't be found to refund against. |
   | `400` | `Unable to refund payment method.` | The payment method isn't a card payment method. |
   | `409` | `A refund is already in progress. Please wait for it to complete.` | Wait for the earlier refund's webhook, then try again. |
 

@@ -125,8 +125,11 @@ import Example from '../../../components/Example.astro';
   | `Invalid scheme` | `type` isn't one of `card`, `childcare-voucher` or `tax-free-childcare`. |
   | `Invalid scheme change` | The type can only change between `tax-free-childcare` and `childcare-voucher`. |
   | `Voucher provider missing` | `type` is `childcare-voucher` but there's no `voucher_provider`. |
-  | `Invalid data` | The payment method isn't a voucher payment, so it can't take voucher details. |
   | `Invalid update` | The payment method is already in bank and can't be changed. |
+
+  Payment methods of Express checkout payments, and payment methods that have already taken a
+  payment, can't be updated: those requests are rejected too. A request that changes nothing
+  returns `204` and sends no webhook.
 
   An invalid or expired token is rejected before any of these checks.
 

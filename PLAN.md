@@ -191,6 +191,10 @@ Deliberate differences kept, because the code shows Notion was wrong or incomple
   `childcare-voucher` (`validateSchemeChange` in `src/be/subsidy/manager.ts`). A type change cancels
   the old payment method and creates a new one with a new ID, which `payment_updated` reports.
   Notion is silent; the update page and examples now follow the code.
+- **Update a payment method limits**: Express checkout payments (`InvalidExpressPaymentUpdateError`)
+  and payment methods that have already taken a payment (`HasNonZeroPaymentError`) can't be
+  updated, and a request that changes nothing is a no-op. The `Invalid data` message mapped in the
+  controller is never raised (`IsNotChildcareVoucherError` is never thrown), so it isn't listed.
 - **Endpoint headers** show paths relative to the documented base URL (`…/api/`); the full URLs
   underneath are unchanged.
 

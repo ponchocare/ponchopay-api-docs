@@ -17,7 +17,8 @@ import Example from '../../../components/Example.astro';
 
   That's when the parent finishes their part of checkout. For Standard Tax-Free Childcare and
   vouchers it comes before the [`payment_completed`](/webhooks/events/payment-completed/) webhook,
-  which follows once the money is confirmed.
+  which follows once the money is confirmed (on the legacy lifecycle, `payment_completed` is sent
+  at the same time).
 
   PonchoPay sends the parent's browser back to your **Payment completed** redirect URL, set in
   **Settings → API integration**, with a form `POST`. Show them a confirmation page, or redirect

@@ -192,7 +192,7 @@ export const schemas = {
           { value: 'payment_captured', description: 'The parent made a card, Pay by Bank or Express Tax-Free Childcare payment, or completed the card pre-authorisation for a Standard Tax-Free Childcare or voucher payment. Not sent if payment guarantee is turned off.' },
           { value: 'payment_updated', description: 'The amount or a payment method changed.' },
           { value: 'payment_reported_complete', description: "The parent says they've paid with Standard Tax-Free Childcare or childcare vouchers, outside PonchoPay." },
-          { value: 'payment_completed', description: 'The parent has done everything needed for the payment to be taken from the payment method they chose (for Standard Tax-Free Childcare and vouchers, once it\'s confirmed in bank).' },
+          { value: 'payment_completed', description: 'The parent has done everything needed for the payment to be taken from the payment method they chose (for Standard Tax-Free Childcare and vouchers on the current lifecycle, once it\'s confirmed in bank).' },
           { value: 'payment_in_bank', description: "PonchoPay found the payment in the provider's bank account." },
           { value: 'payment_refunded', description: 'All or part of the payment was refunded.' },
           { value: 'payment_cancelled', description: 'The payment was cancelled.' },
