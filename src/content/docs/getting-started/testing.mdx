@@ -30,10 +30,10 @@ For more cards and scenarios, see Adyen's
 
 Pay by Bank on demo uses the Tink demo bank. Log in with:
 
-| User                                                                                    | Username    | Password | Scenario                             |
-| --------------------------------------------------------------------------------------- | ----------- | -------- | ------------------------------------ |
-| [User 1](https://console.tink.com/demobank/users/8ee48c01ed2741d9b5cd5fcc83d5ae89)      | `u83646180` | `rlf446` | Several personal accounts: succeeds  |
-| [User 2](https://console.tink.com/demobank/users/e6b89f5a3ef2463d917ccef86326ef3c)      | `u37710169` | `fve797` | Variable recurring payment: succeeds |
+| User                                                                               | Username    | Password | Description                    | Scenario   |
+| ---------------------------------------------------------------------------------- | ----------- | -------- | ------------------------------ | ---------- |
+| [User 1](https://console.tink.com/demobank/users/8ee48c01ed2741d9b5cd5fcc83d5ae89) | `u83646180` | `rlf446` | User with multiple personal... | Successful |
+| [User 2](https://console.tink.com/demobank/users/e6b89f5a3ef2463d917ccef86326ef3c) | `u37710169` | `fve797` | Variable Recurring Payment     | Successful |
 
 ## Tax-Free Childcare
 
@@ -57,8 +57,8 @@ on your laptop, use a tunnelling tool such as ngrok or Cloudflare Tunnel.
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`payment_captured`](/webhooks/events/payment-captured/)                     | Enter card details in checkout.                                                                                                                                     |
 | [`payment_reported_complete`](/webhooks/events/payment-reported-complete/)   | Pay with Standard Tax-Free Childcare or vouchers and report the payment as complete in checkout.                                                                   |
-| [`payment_completed`](/webhooks/events/payment-completed/)                   | Sent automatically once the payment has been marked as complete.                                                                                                   |
-| [`payment_in_bank`](/webhooks/events/payment-in-bank/)                       | On the [payments page](https://demo.ponchopay.com/provider/admin/payments), use **Mark in bank** at the end of the row. Only completed payments can be marked.     |
+| [`payment_completed`](/webhooks/events/payment-completed/)                   | Sent automatically once the payment is complete. Card, bank and Express Tax-Free Childcare payments: finish checkout. Standard Tax-Free Childcare and vouchers: report the payment as complete in checkout, then mark it in bank (below). |
+| [`payment_in_bank`](/webhooks/events/payment-in-bank/)                       | In production this is sent when bank reconciliation runs. On demo, simulate it: on the [payments page](https://demo.ponchopay.com/provider/admin/payments), use **Mark in bank** at the end of the row. It's available for completed and reported-complete payments, and card payments, when reconciliation is turned on. |
 | [`payment_refunded`](/webhooks/events/payment-refunded/)                     | [Refund a payment method](/endpoints/refund-payment-method/), or refund from the admin.                                                                            |
 | [`payment_cancelled`](/webhooks/events/payment-cancelled/)                   | [Cancel the payment](/endpoints/cancel-payment/), or cancel it in the admin.                                                                                       |
 

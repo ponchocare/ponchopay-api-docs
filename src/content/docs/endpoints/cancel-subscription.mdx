@@ -56,6 +56,7 @@ import Fields from '../../../components/Fields.astro';
         import { Client } from '@ponchopay/pp-nodejs';
 
         const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+        // Demo: new Client(key, 'https://demo.ponchopay.com/')
 
         await client.cancelRecursion('e4b8c2d6-1f3a-4c5e-9b7d-2a6f8e0c4b19', {
           urn: 'INTTEST',
@@ -70,6 +71,7 @@ import Fields from '../../../components/Fields.astro';
         use PonchoPay\Client;
 
         $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+        // Demo: new Client($key, 'https://demo.ponchopay.com/')
 
         $client->cancelRecursion('e4b8c2d6-1f3a-4c5e-9b7d-2a6f8e0c4b19', [
             'urn' => 'INTTEST',
@@ -93,8 +95,10 @@ import Fields from '../../../components/Fields.astro';
 <ApiColumns>
   **`204 No Content`**: the recurring payment was cancelled.
 
-  **`400 Bad Request`**: the recurring payment couldn't be cancelled. An invalid or expired token,
-  or a recurring payment that doesn't belong to the token's location, is also rejected.
+  **`400 Bad Request`**: the recurring payment couldn't be cancelled.
+
+  Requests with an invalid or expired token, or for a recurring payment that doesn't belong to the
+  token's location, are rejected.
 
   <Fragment slot="code">
     ```http title="Response"

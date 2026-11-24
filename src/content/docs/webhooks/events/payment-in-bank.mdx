@@ -51,9 +51,11 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 ## Test it
 
 <ApiColumns>
-  On the demo environment, complete a payment, then use **Mark in bank** at the end of its row on
-  the [payments page](https://demo.ponchopay.com/provider/admin/payments). Only completed payments
-  can be marked in bank. In production this happens when bank reconciliation runs.
+  On the demo environment, complete a payment (or report a Standard Tax-Free Childcare or voucher
+  payment as complete), then use **Mark in bank** at the end of its row on the
+  [payments page](https://demo.ponchopay.com/provider/admin/payments). It's available for completed
+  and reported-complete payments, and card payments, when reconciliation is turned on. In
+  production this happens when bank reconciliation runs.
 
   See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
 

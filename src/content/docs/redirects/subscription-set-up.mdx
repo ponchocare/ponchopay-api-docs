@@ -12,8 +12,8 @@ import Fields from '../../../components/Fields.astro';
 import Example from '../../../components/Example.astro';
 
 <ApiColumns>
-  Sent when the parent finishes setting up a recurring payment (subscription): PonchoPay has
-  everything it needs to take its payments.
+  Sent when the recurring payment (subscription) is fully set up: the parent has taken all the
+  necessary actions to make sure it will be able to generate payments.
 
   PonchoPay sends the parent's browser back to your **Subscription set up** redirect URL, set in
   **Settings → API integration**, with a form `POST`. Show them a confirmation page, or redirect
@@ -36,7 +36,8 @@ import Example from '../../../components/Example.astro';
 ## Form fields
 
 <ApiColumns>
-  The body is form-encoded (`application/x-www-form-urlencoded`) with these fields:
+  The body is a **SubscriptionSetUp** object, sent by PonchoPay when a recurring payment is successfully set up. It's form-encoded
+  (`application/x-www-form-urlencoded`) with these fields:
 
   <Fields schema="RedirectBody" />
 

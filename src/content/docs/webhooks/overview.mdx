@@ -57,7 +57,8 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
 
   Integrations set up before 25 April 2025 may still use the old lifecycle, which has no
   `payment_reported_complete`. In it, `payment_completed` is sent as soon as the parent reports a
-  Standard Tax-Free Childcare or voucher payment as paid, not when the money is confirmed. To move
+  Standard Tax-Free Childcare or voucher payment as paid, not when the money is confirmed. The card
+  pre-authorisation acts as a backup in this case. To move
   to the current lifecycle, email [support@ponchopay.com](mailto:support@ponchopay.com).
 
   </details>
@@ -104,7 +105,8 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
   [SubscriptionCallback](/objects/subscription-callback/) body:
 
   - [`recurring_payment_captured`](/webhooks/events/recurring-payment-captured/): the parent
-    completed the card pre-authorisation for a Tax-Free Childcare or voucher recurring payment.
+    completed the card pre-authorisation for a Tax-Free Childcare or voucher recurring payment. Not
+    sent if payment guarantee is turned off.
   - [`recurring_payment_set_up`](/webhooks/events/recurring-payment-set-up/): the recurring payment
     is ready to take payments.
   - [`recurring_payment_cancel`](/webhooks/events/recurring-payment-cancel/): the recurring payment

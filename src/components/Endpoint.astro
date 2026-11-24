@@ -10,6 +10,8 @@ interface Props {
 }
 
 const { method, path } = Astro.props;
+// The documented base URLs end in /api/, so show the path relative to them.
+const relativePath = path.replace(/^\/api(?=\/)/, '');
 const environments = [
   { name: 'Production', base: 'https://pay.ponchopay.com' },
   { name: 'Demo', base: 'https://demo.ponchopay.com' },
@@ -19,7 +21,7 @@ const environments = [
 <div class="pp-endpoint not-content">
   <div class="pp-endpoint__line">
     <span class={`pp-method pp-method--${method.toLowerCase()}`}>{method}</span>
-    <code class="pp-endpoint__path">{path}</code>
+    <code class="pp-endpoint__path">{relativePath}</code>
   </div>
   <dl class="pp-endpoint__envs">
     {

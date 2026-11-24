@@ -173,6 +173,15 @@ import Fields from '../../../components/Fields.astro';
       return new Response(null, { status: 204 });
     }
     ```
+
+    ```ts title="Only check the signature"
+    import { isValidCallback } from '@ponchopay/pp-nodejs';
+
+    const valid = await isValidCallback(process.env.PONCHOPAY_INTEGRATION_KEY!, request);
+    if (!valid) {
+      return new Response('Invalid signature', { status: 401 });
+    }
+    ```
   </Fragment>
 </ApiColumns>
 
@@ -210,7 +219,7 @@ import Fields from '../../../components/Fields.astro';
     await client.updatePaymentMethod(paymentMethodId, {
       ...who,
       type: PaymentMethodType.ChildcareVouchers,
-      amount: 3000,
+      amount: 4274,
       voucher_provider: 'cooperating_helping_4ever',
     });
 
@@ -260,10 +269,10 @@ import Fields from '../../../components/Fields.astro';
   | `client.initiatePayment(init: PaymentInit): Promise<string>` | The payment URL the parent must follow to complete the payment | [Initiate a payment](/endpoints/initiate-payment/) |
   | `client.initiateSubscription(init: SubscriptionInit): Promise<string>` | The URL the parent must follow to set up the recurring payment | [Initiate a subscription](/endpoints/initiate-subscription/) |
   | `client.validateLocationUrn(payload: JWTPayload): Promise<object>` | `{ verification_status, card_payments_enabled, childcare_voucher_payments_enabled, tax_free_childcare_payments_enabled }` | [Validate location](/endpoints/validate-location/) |
-  | `client.updatePaymentMethod(paymentMethodId: string, update: PaymentMethodUpdate): Promise<void>` | Nothing | [Update a payment method](/endpoints/update-payment-method/) |
-  | `client.refundPaymentMethod(paymentMethodId: string, refund: PaymentMethodRefund): Promise<void>` | Nothing | [Refund a payment method](/endpoints/refund-payment-method/) |
-  | `client.cancelPayment(paymentId: string, payload: JWTPayload): Promise<void>` | Nothing | [Cancel a payment](/endpoints/cancel-payment/) |
-  | `client.cancelRecursion(recursionId: string, payload: JWTPayload): Promise<void>` | Nothing | [Cancel a subscription](/endpoints/cancel-subscription/) |
+  | `client.updatePaymentMethod(paymentMethodId: string, update: PaymentMethodUpdate): Promise<void>` | Nothing. Await the promise | [Update a payment method](/endpoints/update-payment-method/) |
+  | `client.refundPaymentMethod(paymentMethodId: string, refund: PaymentMethodRefund): Promise<void>` | Nothing. Await the promise | [Refund a payment method](/endpoints/refund-payment-method/) |
+  | `client.cancelPayment(paymentId: string, payload: JWTPayload): Promise<void>` | Nothing. Await the promise | [Cancel a payment](/endpoints/cancel-payment/) |
+  | `client.cancelRecursion(recursionId: string, payload: JWTPayload): Promise<void>` | Nothing. Await the promise | [Cancel a subscription](/endpoints/cancel-subscription/) |
   | `createToken(key: string, metadata: string): string` | The token for the initiation endpoints | [Initiation token](/getting-started/authentication/#initiation-token) |
   | `createJWT(urn: string, key: string, email: string, data: string): Promise<string>` | The JWT for the management endpoints, valid for 5 seconds. `data` is the body to be sent | [Management JWT](/getting-started/authentication/#management-jwt) |
   | `parseCallback<T>(key: string, request: Request): Promise<T>` | The parsed webhook body, after checking it comes from PonchoPay. Throws if it doesn't | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |

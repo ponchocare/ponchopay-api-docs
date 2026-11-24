@@ -20,7 +20,7 @@ import Example from '../../../components/Example.astro';
   Refunds all or part of one payment method within a payment. The money goes back to the card or
   account the parent paid with. You can refund in several parts, up to the payment method's amount.
 
-  PonchoPay sends [`payment_refunded`](/webhooks/events/payment-refunded/) for each refund.
+  PonchoPay sends [`payment_refunded`](/webhooks/events/payment-refunded/) when the payment is refunded.
 
   <Aside type="caution" title="Card payments only">
     Only card payment methods (including Apple Pay, Google Pay, Klarna and Pay by Bank) can be
@@ -64,6 +64,7 @@ import Example from '../../../components/Example.astro';
         import { Client } from '@ponchopay/pp-nodejs';
 
         const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+        // Demo: new Client(key, 'https://demo.ponchopay.com/')
 
         await client.refundPaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', {
           urn: 'INTTEST',
@@ -79,6 +80,7 @@ import Example from '../../../components/Example.astro';
         use PonchoPay\Client;
 
         $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+        // Demo: new Client($key, 'https://demo.ponchopay.com/')
 
         $client->refundPaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', [
             'urn' => 'INTTEST',

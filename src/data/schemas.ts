@@ -89,7 +89,7 @@ export const schemas = {
         type: 'string',
         example: 'TOKEN_FROM_YOUR_SERVER',
         required: true,
-        description: 'The [authentication token](/getting-started/authentication/#initiation-token), computed from this request\'s `metadata`.',
+        description: 'The [authentication token](/getting-started/authentication/#initiation-token), computed from your integration key and this request\'s `metadata`.',
       },
       {
         name: 'note',
@@ -102,7 +102,7 @@ export const schemas = {
         type: 'string',
         example: '2026-12-31T23:59:59.000Z',
         description:
-          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details (you get the [`payment_captured`](/webhooks/events/payment-captured/) webhook when they do). Once a payment has expired, nothing more can be done with it.',
+          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details (you get the [`payment_captured`](/webhooks/events/payment-captured/) webhook when they do, if payment guarantee is turned on). Once a payment has expired, nothing more can be done with it.',
       },
       {
         name: 'constraints',
@@ -189,7 +189,7 @@ export const schemas = {
         example: 'payment_completed',
         description: 'Which event this is.',
         enum: [
-          { value: 'payment_captured', description: 'The parent made a card payment, or completed the card pre-authorisation for a Tax-Free Childcare or voucher payment.' },
+          { value: 'payment_captured', description: 'The parent made a card payment, or completed the card pre-authorisation for a Tax-Free Childcare or voucher payment. Not sent if payment guarantee is turned off.' },
           { value: 'payment_updated', description: 'The amount or a payment method changed.' },
           { value: 'payment_reported_complete', description: "The parent says they've paid outside PonchoPay." },
           { value: 'payment_completed', description: "The payment is done and the money will reach the provider." },
@@ -408,7 +408,7 @@ export const schemas = {
         enum: [
           {
             value: 'recurring_payment_captured',
-            description: 'The parent completed the card pre-authorisation for a Tax-Free Childcare or voucher recurring payment.',
+            description: 'The parent completed the card pre-authorisation for a Tax-Free Childcare or voucher recurring payment. Not sent if payment guarantee is turned off.',
           },
           {
             value: 'recurring_payment_set_up',
@@ -563,7 +563,7 @@ export const schemas = {
         required: true,
         example: 'TOKEN_FROM_YOUR_SERVER',
         description:
-          'The [authentication token](/getting-started/authentication/#initiation-token), computed from this request\'s `metadata`.',
+          'The [authentication token](/getting-started/authentication/#initiation-token), computed from your integration key and this request\'s `metadata`.',
       },
       {
         name: 'note',
@@ -739,7 +739,7 @@ export const schemas = {
         name: 'amount',
         type: 'integer',
         required: true,
-        example: 3000,
+        example: 4274,
         description: 'The new amount for this payment method, in pence.',
       },
       {
@@ -788,7 +788,7 @@ export const schemas = {
         required: true,
         example: 'admin@club.example.com',
         description:
-          "Who's making the request, recorded for your audit trail. It doesn't have to belong to a PonchoPay user.",
+          "Who's making the request. It's only used to know who authored it, and it doesn't have to belong to a PonchoPay user.",
       },
       {
         name: 'sig',

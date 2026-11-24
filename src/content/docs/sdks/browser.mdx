@@ -52,6 +52,8 @@ import Fields from '../../../components/Fields.astro';
     npm install @ponchopay/pp-browser
     ```
 
+    Or use the package manager you prefer, such as `yarn add` or `pnpm add`.
+
     ```ts
     import '@ponchopay/pp-browser';
     ```
@@ -208,7 +210,9 @@ import Fields from '../../../components/Fields.astro';
     const button = document.querySelector('pp-payment');
 
     // e.g. after the parent changes their basket
-    button.setAttribute('amount', '5274'); // same metadata, so the token stays the same
+    button.setAttribute('line_items.1.quantity', '2'); // a second packed lunch
+    button.setAttribute('amount', '4548');             // 2000 × 2 + 274 × 2
+    // same metadata, so the token stays the same
 
     // submit from your own button or flow
     button.submit();

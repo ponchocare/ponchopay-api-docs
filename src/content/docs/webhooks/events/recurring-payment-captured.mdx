@@ -1,6 +1,6 @@
 ---
 title: Recurring payment captured
-description: "The recurring_payment_captured webhook. Sent when the parent leaves a card as a guarantee for a recurring payment."
+description: "The recurring_payment_captured webhook. Sent when the parent completes the card pre-authorisation for a Tax-Free Childcare or voucher recurring payment."
 tableOfContents: false
 sidebar:
   order: 8
@@ -36,7 +36,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   <Fields schema="SubscriptionCallback" />
 
   <Fragment slot="code">
-    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_captured', 'request.metadata': 'membership-2291', 'subscription.payment_methods.0.amount': 8500 }} />
+    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_captured', 'request.metadata': 'membership-2291', 'subscription.payment_methods.0.amount': 8500, 'subscription.payment_methods.0.id': 'b7d9f1a3-4c6e-4a8b-9d0f-3e5a7c9b1d42', 'subscription.payment_methods.0.type': 'tax_free_childcare', 'subscription.payment_methods.0.variant': 'manual' }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     recurring payment.
   </Fragment>
@@ -49,8 +49,10 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 ## Test it
 
 <ApiColumns>
-  On the demo environment, [initiate a subscription](/endpoints/initiate-subscription/) and enter
-  a [test card](/getting-started/testing/#test-cards) while setting it up.
+  On the demo environment, with payment guarantee turned on in your settings,
+  [initiate a subscription](/endpoints/initiate-subscription/), choose Tax-Free Childcare or
+  vouchers, and complete the card pre-authorisation with a
+  [test card](/getting-started/testing/#test-cards).
 
   See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
 

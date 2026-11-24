@@ -164,7 +164,7 @@ import jwtIoCheck from '../../../assets/jwt-io-check.png';
         import jwt  # PyJWT
 
         key = os.environ["PONCHOPAY_INTEGRATION_KEY"]
-        body = json.dumps({"amount": 1000})  # "" for requests with no body
+        body = json.dumps({"amount": 1000}, separators=(",", ":"))  # "" for requests with no body
         now = int(time.time())
 
         token = jwt.encode(
@@ -182,7 +182,11 @@ import jwtIoCheck from '../../../assets/jwt-io-check.png';
       </TabItem>
     </Tabs>
 
-    <Example schema="JwtClaims" title="Example JWT payload" />
+    <Example
+      schema="JwtClaims"
+      title="Example JWT payload for the body above"
+      overrides={{ sig: 'YSYS0gj7YY6ysAfSp/jXoc+1EVMjiSmPHMMzIsMJS8w=' }}
+    />
   </Fragment>
 </ApiColumns>
 

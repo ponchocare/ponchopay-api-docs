@@ -182,6 +182,20 @@ Deliberate differences kept, because the code shows Notion was wrong or incomple
   `createToken`. The site imports the right function.
 - **Recurring payment cancel**: also possible through the Cancel a subscription endpoint, not just
   the admin.
+- **Mark in bank on demo**: Notion says it "can only be triggered on complete payments". The admin
+  shows it for completed and reported-complete payments, card payments and late payments, when
+  reconciliation is on (`MarkInBank.svelte`). The site says so, which is what makes Standard TFC
+  and voucher `payment_completed` testable on demo.
+- **Endpoint headers** show paths relative to the documented base URL (`…/api/`); the full URLs
+  underneath are unchanged.
+
+A second pass (four parity reviews plus a cross-page consistency review) found 30 smaller items:
+leftover inferences, missing caveats (payment guarantee on every captured event, card pre-auth
+backing legacy completions), demo-account wording, redirect timing, Tink table columns, PHP
+parameter names, an `isValidCallback` example, and examples that disagreed with each other (JWT
+`sig`, line item totals, update vs `payment_updated`, recurring payment method IDs, demo hints).
+All fixed. Not changed, because Notion is silent: whether Pay by Bank gets `payment_captured`, what
+an unpaid payment's `payment_methods` looks like, and refund fields inside recurring payments.
 
 ## Open questions
 

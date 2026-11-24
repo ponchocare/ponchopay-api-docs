@@ -65,12 +65,13 @@ import Example from '../../../components/Example.astro';
         import { Client, PaymentMethodType } from '@ponchopay/pp-nodejs';
 
         const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+        // Demo: new Client(key, 'https://demo.ponchopay.com/')
 
         await client.updatePaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', {
           urn: 'INTTEST',
           email: 'admin@club.example.com',
           type: PaymentMethodType.ChildcareVouchers, // 'childcare-voucher'
-          amount: 3000,
+          amount: 4274,
           voucher_provider: 'cooperating_helping_4ever',
         });
         ```
@@ -82,12 +83,13 @@ import Example from '../../../components/Example.astro';
         use PonchoPay\Client;
 
         $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+        // Demo: new Client($key, 'https://demo.ponchopay.com/')
 
         $client->updatePaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', [
             'urn' => 'INTTEST',
             'email' => 'admin@club.example.com',
             'type' => 'childcare-voucher',
-            'amount' => 3000,
+            'amount' => 4274,
             'voucher_provider' => 'cooperating_helping_4ever',
         ]);
         ```
@@ -98,7 +100,7 @@ import Example from '../../../components/Example.astro';
         curl -X PUT https://demo.ponchopay.com/api/payment-method/a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20 \
           -H "Authorization: Bearer $JWT" \
           -H 'Content-Type: application/json' \
-          -d '{"type":"childcare-voucher","amount":3000,"voucher_provider":"cooperating_helping_4ever"}'
+          -d '{"type":"childcare-voucher","amount":4274,"voucher_provider":"cooperating_helping_4ever"}'
         ```
       </TabItem>
     </Tabs>

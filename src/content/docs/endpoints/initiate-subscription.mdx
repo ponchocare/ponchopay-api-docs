@@ -122,6 +122,7 @@ import Example from '../../../components/Example.astro';
       </TabItem>
       <TabItem label="HTML form">
         ```html
+        <!-- Demo: https://demo.ponchopay.com/api/integration/generic/subscription/redirect -->
         <form method="post" action="https://pay.ponchopay.com/api/integration/generic/subscription/redirect">
           <input type="hidden" name="token" value="TOKEN_FROM_YOUR_SERVER" />
           <input type="hidden" name="urn" value="INTTEST" />
@@ -198,8 +199,10 @@ import Example from '../../../components/Example.astro';
 ## What happens next
 
 <ApiColumns>
-  When the parent leaves a card as a guarantee you get
-  [`recurring_payment_captured`](/webhooks/events/recurring-payment-captured/). When everything
+  For Tax-Free Childcare or voucher recurring payments, when the parent completes the card
+  pre-authorisation you get
+  [`recurring_payment_captured`](/webhooks/events/recurring-payment-captured/), unless payment
+  guarantee is turned off. When everything
   needed to take payments is in place you get
   [`recurring_payment_set_up`](/webhooks/events/recurring-payment-set-up/), and the parent is sent to
   your **Subscription set up** [redirect](/redirects/subscription-set-up/) URL.

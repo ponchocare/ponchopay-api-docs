@@ -22,8 +22,8 @@ The API has three kinds of connection:
   recurring payment, check a location, update, refund or cancel.
 - **[Webhooks](/webhooks/overview/)** send information from PonchoPay to your server as payments
   progress: captured, completed, in bank, refunded and so on.
-- **[Redirects](/redirects/payment-completed/)** send the parent back to your site when they've
-  finished paying.
+- **[Redirects](/redirects/payment-completed/)** guide the parent from PonchoPay back to your site
+  when their payment is complete or their recurring payment is set up.
 
 You set your webhook and redirect URLs in the PonchoPay admin, under **Settings → API
 integration**.
@@ -42,14 +42,14 @@ All requests must use HTTPS. Build and test against demo, where you can pay with
 [test cards and credentials](/getting-started/testing/), then switch the base URL and integration
 key for production.
 
-<Aside title="Try it straight away">
-  You can create test payments on demo before you have an account, with this shared integration
-  key and the test location URNs `INTTEST` and `INTTEST2`:
+<Aside title="Shared demo key">
+  This shared integration key lets you create payments on the demo environment, with the test
+  location URNs `INTTEST` and `INTTEST2`:
 
   `8X8E9zZblEAV9A0PKcEdWk6j5FeLUkjHaLmuiXkfTPWnsw2CedX8pG1WY/ydKjs9`
 
-  To receive webhooks you need your own demo account. Email
-  [support@ponchopay.com](mailto:support@ponchopay.com) to get one.
+  To test webhooks, and to place test orders, you need a demo account created for you. Email
+  [support@ponchopay.com](mailto:support@ponchopay.com) to request one.
 </Aside>
 
 ## Set up your account

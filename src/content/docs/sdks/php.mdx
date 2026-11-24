@@ -176,7 +176,7 @@ checks the `signature` header with `hash_hmac` and `hash_equals`, then parses th
 
     $client->updatePaymentMethod($paymentMethodId, [...$who,
         'type' => 'childcare-voucher',
-        'amount' => 3000,
+        'amount' => 4274,
         'voucher_provider' => 'cooperating_helping_4ever',
     ]);
 
@@ -228,10 +228,10 @@ checks the `signature` header with `hash_hmac` and `hash_equals`, then parses th
   | `$client->initiatePayment(array $init)` | `string`: checkout URL | [Initiate a payment](/endpoints/initiate-payment/) |
   | `$client->initiateSubscription(array $init)` | `string`: set-up URL | [Initiate a subscription](/endpoints/initiate-subscription/) |
   | `$client->validateLocationUrn(['urn' => …, 'email' => …])` | `object` with `verification_status`, `card_payments_enabled`, `childcare_voucher_payments_enabled`, `tax_free_childcare_payments_enabled` | [Validate location](/endpoints/validate-location/) |
-  | `$client->updatePaymentMethod(string $id, array $update)` | `void` | [Update a payment method](/endpoints/update-payment-method/) |
-  | `$client->refundPaymentMethod(string $id, array $refund)` | `void` | [Refund a payment method](/endpoints/refund-payment-method/) |
-  | `$client->cancelPayment(string $id, array $payload)` | `void` | [Cancel a payment](/endpoints/cancel-payment/) |
-  | `$client->cancelRecursion(string $id, array $payload)` | `void` | [Cancel a subscription](/endpoints/cancel-subscription/) |
+  | `$client->updatePaymentMethod(string $paymentMethodId, array $update)` | `void` | [Update a payment method](/endpoints/update-payment-method/) |
+  | `$client->refundPaymentMethod(string $paymentMethodId, array $refund)` | `void` | [Refund a payment method](/endpoints/refund-payment-method/) |
+  | `$client->cancelPayment(string $paymentId, array $payload)` | `void` | [Cancel a payment](/endpoints/cancel-payment/) |
+  | `$client->cancelRecursion(string $recursionId, array $payload)` | `void` | [Cancel a subscription](/endpoints/cancel-subscription/) |
   | `PonchoPay\createToken(string $key, string $metadata)` | `string`: initiation token | [Initiation token](/getting-started/authentication/#initiation-token) |
   | `PonchoPay\createJWT(string $urn, string $key, string $email, string $data)` | `string`: management JWT, valid for 5 seconds | [Management JWT](/getting-started/authentication/#management-jwt) |
 

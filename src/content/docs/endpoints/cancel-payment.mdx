@@ -56,6 +56,7 @@ import Fields from '../../../components/Fields.astro';
         import { Client } from '@ponchopay/pp-nodejs';
 
         const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+        // Demo: new Client(key, 'https://demo.ponchopay.com/')
 
         await client.cancelPayment('6d2f1c7e-8a4b-4f0e-b3a9-5c8e1d2f7a60', {
           urn: 'INTTEST',
@@ -70,6 +71,7 @@ import Fields from '../../../components/Fields.astro';
         use PonchoPay\Client;
 
         $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+        // Demo: new Client($key, 'https://demo.ponchopay.com/')
 
         $client->cancelPayment('6d2f1c7e-8a4b-4f0e-b3a9-5c8e1d2f7a60', [
             'urn' => 'INTTEST',
@@ -93,8 +95,10 @@ import Fields from '../../../components/Fields.astro';
 <ApiColumns>
   **`204 No Content`**: the payment was cancelled.
 
-  **`400 Bad Request`**: the payment couldn't be cancelled. An invalid or expired token, or a
-  payment that doesn't belong to the token's location, is also rejected.
+  **`400 Bad Request`**: the payment couldn't be cancelled.
+
+  Requests with an invalid or expired token, or for a payment that doesn't belong to the token's
+  location, are rejected.
 
   <Fragment slot="code">
     ```http title="Response"

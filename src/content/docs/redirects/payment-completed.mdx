@@ -12,8 +12,8 @@ import Fields from '../../../components/Fields.astro';
 import Example from '../../../components/Example.astro';
 
 <ApiColumns>
-  Sent when the parent finishes checkout for a payment: they've done everything needed for the
-  payment to be taken.
+  Sent when the payment is fully complete: the parent has taken all the necessary actions to make
+  sure the payment will be correctly taken from the payment method they chose.
 
   PonchoPay sends the parent's browser back to your **Payment completed** redirect URL, set in
   **Settings → API integration**, with a form `POST`. Show them a confirmation page, or redirect
@@ -36,7 +36,8 @@ import Example from '../../../components/Example.astro';
 ## Form fields
 
 <ApiColumns>
-  The body is form-encoded (`application/x-www-form-urlencoded`) with these fields:
+  The body is a **PaymentCompleted** object, sent by PonchoPay when a payment successfully completes. It's form-encoded
+  (`application/x-www-form-urlencoded`) with these fields:
 
   <Fields schema="RedirectBody" />
 
