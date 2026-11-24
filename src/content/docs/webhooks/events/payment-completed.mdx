@@ -19,8 +19,8 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   Sent when the parent has done everything needed for the payment to be taken. This is usually the
   event to act on: mark the order as paid, confirm the booking, or send your own receipt.
 
-  - **Card, bank or Express Tax-Free Childcare payments**: as soon as checkout finishes and the funds
-    are captured. For card and Express Tax-Free Childcare,
+  - **Card, Pay by Bank or Express Tax-Free Childcare payments**: as soon as checkout finishes and
+    the funds are captured.
     [`payment_captured`](/webhooks/events/payment-captured/) is sent at the same time, unless
     payment guarantee is turned off.
   - **Offline payments, such as Standard Tax-Free Childcare or childcare vouchers**: once PonchoPay

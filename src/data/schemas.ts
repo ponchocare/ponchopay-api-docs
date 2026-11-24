@@ -46,7 +46,7 @@ export interface Schema {
 const PAYMENT_METHOD_TYPES: EnumValue[] = [
   { value: 'tax_free_childcare', description: 'Paid with Tax-Free Childcare.' },
   { value: 'childcare_vouchers', description: 'Paid with childcare vouchers.' },
-  { value: 'credit_debit_card', description: 'Paid with a credit or debit card.' },
+  { value: 'credit_debit_card', description: 'Paid with a credit or debit card, or with Pay by Bank, which works the same way.' },
 ];
 
 export const schemas = {
@@ -189,7 +189,7 @@ export const schemas = {
         example: 'payment_completed',
         description: 'Which event this is.',
         enum: [
-          { value: 'payment_captured', description: 'The parent made a card payment, or completed the card pre-authorisation for a Tax-Free Childcare or voucher payment. Not sent if payment guarantee is turned off.' },
+          { value: 'payment_captured', description: 'The parent made a card or Pay by Bank payment, or completed the card pre-authorisation for a Tax-Free Childcare or voucher payment. Not sent if payment guarantee is turned off.' },
           { value: 'payment_updated', description: 'The amount or a payment method changed.' },
           { value: 'payment_reported_complete', description: "The parent says they've paid outside PonchoPay." },
           { value: 'payment_completed', description: "The payment is done and the money will reach the provider." },
@@ -273,7 +273,7 @@ export const schemas = {
       {
         name: 'payment_methods',
         type: 'array of objects',
-        description: 'Each payment method used and how much it paid.',
+        description: 'Each payment method the parent selected, and the amount allocated to it. A payment has no payment method until the parent selects one, and no webhooks are sent before then.',
         children: 'PaymentMethod',
       },
     ],
@@ -288,7 +288,7 @@ export const schemas = {
         name: 'id',
         type: 'string',
         example: 'a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20',
-        description: "The payment method's ID. Use it to [update](/endpoints/update-payment-method/) or [refund](/endpoints/refund-payment-method/) this part of the payment.",
+        description: "The payment method's ID. Use it to [update](/endpoints/update-payment-method/) or [refund](/endpoints/refund-payment-method/) this part of a payment. Only payments can be refunded, not recurring payments.",
       },
       {
         name: 'type',
@@ -462,7 +462,7 @@ export const schemas = {
       {
         name: 'payment_methods',
         type: 'array of objects',
-        description: 'The payment methods set up for the recurring payment.',
+        description: 'The payment methods set up for the recurring payment. Recurring payments can\'t be refunded: refund the payments they generate instead. So the refund fields here are always `0`, and these IDs can\'t be used with [Refund a payment method](/endpoints/refund-payment-method/).',
         children: 'PaymentMethod',
       },
     ],

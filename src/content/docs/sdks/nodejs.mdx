@@ -197,8 +197,9 @@ import Fields from '../../../components/Fields.astro';
   - `updatePaymentMethod()` changes one payment method's amount or type. Use the exported
     `PaymentMethodType` values (`card`, `childcare-voucher`, `tax-free-childcare`), which differ
     from the webhook names. See [Update a payment method](/endpoints/update-payment-method/).
-  - `refundPaymentMethod()` fully or partially refunds a card payment method. `amount` can't be more
-    than what's left to refund on that payment method. See
+  - `refundPaymentMethod()` fully or partially refunds a card payment method of a payment. `amount`
+    can't be more than what's left to refund on that payment method. Recurring payments can't be
+    refunded: refund the payments they generate. See
     [Refund a payment method](/endpoints/refund-payment-method/).
   - `cancelPayment()` and `cancelRecursion()` cancel a payment or recurring payment. See
     [Cancel a payment](/endpoints/cancel-payment/) and

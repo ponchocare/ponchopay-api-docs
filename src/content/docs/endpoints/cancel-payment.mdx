@@ -20,7 +20,9 @@ import Fields from '../../../components/Fields.astro';
   before the parent has paid. To give money back on a payment that's been paid, use
   [Refund a payment method](/endpoints/refund-payment-method/).
 
-  PonchoPay sends [`payment_cancelled`](/webhooks/events/payment-cancelled/) after the change.
+  PonchoPay sends [`payment_cancelled`](/webhooks/events/payment-cancelled/) after the change, if
+  the parent had already selected a payment method. Before that, the payment has no payment method
+  and no webhook is sent.
 
   <Fragment slot="code">
     <Endpoint method="PUT" path="/api/payment/{id}/cancel" />

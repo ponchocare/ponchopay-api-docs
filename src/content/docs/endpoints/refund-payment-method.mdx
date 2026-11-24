@@ -20,6 +20,9 @@ import Example from '../../../components/Example.astro';
   Refunds all or part of one payment method within a payment. The money goes back to the card or
   account the parent paid with. You can refund in several parts, up to the payment method's amount.
 
+  Only payments can be refunded. Recurring payments (subscriptions) generate payments: to give
+  money back, refund the payment they generated, not the recurring payment.
+
   PonchoPay sends [`payment_refunded`](/webhooks/events/payment-refunded/) when the payment is refunded.
 
   <Aside type="caution" title="Card payments only">

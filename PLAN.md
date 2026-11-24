@@ -194,8 +194,18 @@ leftover inferences, missing caveats (payment guarantee on every captured event,
 backing legacy completions), demo-account wording, redirect timing, Tink table columns, PHP
 parameter names, an `isValidCallback` example, and examples that disagreed with each other (JWT
 `sig`, line item totals, update vs `payment_updated`, recurring payment method IDs, demo hints).
-All fixed. Not changed, because Notion is silent: whether Pay by Bank gets `payment_captured`, what
-an unpaid payment's `payment_methods` looks like, and refund fields inside recurring payments.
+All fixed.
+
+Three questions Notion didn't answer, confirmed by the product owner on 24 Nov 2026 and now
+documented:
+
+- **Pay by Bank** works the same as card payments: `payment_captured` and `payment_completed` are
+  sent together when checkout finishes.
+- **No payment method, no webhook**: a payment has no payment method until the parent selects one,
+  and no webhooks are sent before then. So cancelling a payment before a method is selected sends
+  no `payment_cancelled`.
+- **Refunds apply to payments only**: recurring payments generate payments and can't be refunded
+  themselves, so the refund fields in a recurring payment's payment methods are always `0`.
 
 ## Open questions
 

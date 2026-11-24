@@ -19,6 +19,9 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
   follow the recommended implementation, your integration may be incomplete and you won't get the
   full value of PonchoPay.
 
+  A payment has no payment method until the parent selects one in checkout, and PonchoPay sends no
+  webhooks for it until then.
+
   Each event has its own URL. Set the ones you want in the PonchoPay admin under **Settings → API
   integration**. You can use the same URL for several events: the body's `event` field says which
   one it is.
@@ -39,7 +42,8 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
 
   1. [`payment_captured`](/webhooks/events/payment-captured/): the parent completed the card
      pre-authorisation for a Tax-Free Childcare or voucher payment. Also sent at the same time as
-     `payment_completed` for card and Express Tax-Free Childcare payments. Not sent if payment
+     `payment_completed` for card, Pay by Bank and Express Tax-Free Childcare payments. Not sent if
+     payment
      guarantee is turned off.
   2. [`payment_reported_complete`](/webhooks/events/payment-reported-complete/): the parent says
      they've paid outside PonchoPay, with Standard Tax-Free Childcare or vouchers. It's their claim,
@@ -64,14 +68,9 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
   </details>
 
   <Fragment slot="code">
-    ```txt title="Card, Express Tax-Free Childcare"
+    ```txt title="Card, Pay by Bank, Express Tax-Free Childcare"
     checkout finished      → payment_captured
                            → payment_completed
-    money found in bank    → payment_in_bank
-    ```
-
-    ```txt title="Bank payments"
-    funds captured         → payment_completed
     money found in bank    → payment_in_bank
     ```
 

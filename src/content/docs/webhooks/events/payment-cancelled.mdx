@@ -20,6 +20,9 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   [Cancel a payment](/endpoints/cancel-payment/) or the admin. The parent can no longer pay it. Not
   every payment can be cancelled.
 
+  It's only sent if the parent had already selected a payment method. A payment cancelled before
+  that has no payment method, so no webhook is sent.
+
   Use it to release the booking or close the order in your system.
 
   <Fragment slot="code">
@@ -49,8 +52,10 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 ## Test it
 
 <ApiColumns>
-  On the demo environment, [initiate a payment](/endpoints/initiate-payment/) without paying it,
-  then call [Cancel a payment](/endpoints/cancel-payment/) or cancel it in the admin.
+  On the demo environment, [initiate a payment](/endpoints/initiate-payment/) and select a payment
+  method in checkout without finishing it, for example Standard Tax-Free Childcare with the card
+  pre-authorisation. Then call [Cancel a payment](/endpoints/cancel-payment/) or cancel it in the
+  admin. Cancelling before a payment method is selected sends no webhook.
 
   See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
 
