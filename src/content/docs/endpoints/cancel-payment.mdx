@@ -60,7 +60,7 @@ import Fields from '../../../components/Fields.astro';
         const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
         // Demo: new Client(key, 'https://demo.ponchopay.com/')
 
-        await client.cancelPayment('6d2f1c7e-8a4b-4f0e-b3a9-5c8e1d2f7a60', {
+        await client.cancelPayment('e2f4a6c8-0b1d-4e3f-9a5c-7d9e1b3c5f84', {
           urn: 'INTTEST',
           email: 'admin@club.example.com',
         });
@@ -75,7 +75,7 @@ import Fields from '../../../components/Fields.astro';
         $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
         // Demo: new Client($key, 'https://demo.ponchopay.com/')
 
-        $client->cancelPayment('6d2f1c7e-8a4b-4f0e-b3a9-5c8e1d2f7a60', [
+        $client->cancelPayment('e2f4a6c8-0b1d-4e3f-9a5c-7d9e1b3c5f84', [
             'urn' => 'INTTEST',
             'email' => 'admin@club.example.com',
         ]);
@@ -84,7 +84,7 @@ import Fields from '../../../components/Fields.astro';
       <TabItem label="cURL">
         ```bash
         # $JWT: a management JWT signed over an empty body
-        curl -X PUT https://demo.ponchopay.com/api/payment/6d2f1c7e-8a4b-4f0e-b3a9-5c8e1d2f7a60/cancel \
+        curl -X PUT https://demo.ponchopay.com/api/payment/e2f4a6c8-0b1d-4e3f-9a5c-7d9e1b3c5f84/cancel \
           -H "Authorization: Bearer $JWT"
         ```
       </TabItem>

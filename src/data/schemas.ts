@@ -288,7 +288,7 @@ export const schemas = {
         name: 'id',
         type: 'string',
         example: 'a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20',
-        description: "The payment method's ID. Use it to [update](/endpoints/update-payment-method/) or [refund](/endpoints/refund-payment-method/) this part of a payment. Only payments can be refunded, not recurring payments.",
+        description: "The payment method's ID. In payment webhooks, use it to [update](/endpoints/update-payment-method/) or [refund](/endpoints/refund-payment-method/) this part of the payment. A recurring payment's payment method IDs can't be used with either endpoint.",
       },
       {
         name: 'type',
@@ -462,7 +462,7 @@ export const schemas = {
       {
         name: 'payment_methods',
         type: 'array of objects',
-        description: 'The payment methods set up for the recurring payment. Recurring payments can\'t be refunded: refund the payments they generate instead. So the refund fields here are always `0`, and these IDs can\'t be used with [Refund a payment method](/endpoints/refund-payment-method/).',
+        description: 'The payment methods set up for the recurring payment. Recurring payments can\'t be refunded: refund the payments they generate instead. So the refund fields here are always `0`, and these IDs can\'t be used with [Update a payment method](/endpoints/update-payment-method/) or [Refund a payment method](/endpoints/refund-payment-method/).',
         children: 'PaymentMethod',
       },
     ],

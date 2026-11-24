@@ -38,7 +38,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   <Fields schema="PaymentCallback" />
 
   <Fragment slot="code">
-    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_refunded', 'payment.refunded_amount': 1000, 'payment.refunded_total': 1000, 'payment.payment_methods.0.refunded_amount': 1000, 'payment.payment_methods.0.refunded_total': 1000 }} />
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_refunded', id: '4d5e6f7a-8b9c-4d0e-1f2a-3b4c5d6e7f84', date: '2026-11-28T14:40:05.000Z', 'payment.refunded_amount': 1000, 'payment.refunded_total': 1000, 'payment.payment_methods.0.refunded_amount': 1000, 'payment.payment_methods.0.refunded_total': 1000 }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     payment.
   </Fragment>
