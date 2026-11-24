@@ -1,0 +1,126 @@
+---
+title: Refund a payment method
+description: Refund all or part of one card payment method within a payment.
+tableOfContents: false
+sidebar:
+  label: Refund payment method
+  order: 5
+  badge:
+    text: PUT
+    variant: caution
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import Endpoint from '../../../components/Endpoint.astro';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+<ApiColumns>
+  Refunds all or part of one payment method within a payment. The money goes back to the card or
+  account the parent paid with. You can refund in several parts, up to the payment method's amount.
+
+  PonchoPay sends [`payment_refunded`](/webhooks/events/payment-refunded/) for each refund.
+
+  <Aside type="caution" title="Card payments only">
+    Only card payment methods (including Apple Pay, Google Pay, Klarna and Pay by Bank) can be
+    refunded here. Tax-Free Childcare refunds must go back to the parent's Tax-Free Childcare
+    account, and voucher refunds go through the voucher provider.
+  </Aside>
+
+  <Fragment slot="code">
+    <Endpoint method="PUT" path="/api/payment-method/{paymentMethodId}/refund" />
+  </Fragment>
+</ApiColumns>
+
+## Authentication
+
+<ApiColumns>
+  Send a [management JWT](/getting-started/authentication/#management-jwt) in the `Authorization`
+  header, with `sig` computed from the exact JSON body you send. The SDKs build the token for you.
+
+  <Fragment slot="code">
+    ```http
+    PUT /api/payment-method/{paymentMethodId}/refund
+    Authorization: Bearer <jwt>
+    Content-Type: application/json
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Parameters
+
+<ApiColumns>
+  <Fields schema="PaymentMethodPath" />
+
+  The body must be JSON:
+
+  <Fields schema="RefundPaymentMethod" />
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { Client } from '@ponchopay/pp-nodejs';
+
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+
+        await client.refundPaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', {
+          urn: 'INTTEST',
+          email: 'admin@club.example.com',
+          amount: 1000, // £10.00
+        });
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use PonchoPay\Client;
+
+        $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+
+        $client->refundPaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', [
+            'urn' => 'INTTEST',
+            'email' => 'admin@club.example.com',
+            'amount' => 1000, // £10.00
+        ]);
+        ```
+      </TabItem>
+      <TabItem label="cURL">
+        ```bash
+        # $JWT: a management JWT whose sig is computed from exactly this body
+        curl -X PUT https://demo.ponchopay.com/api/payment-method/a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20/refund \
+          -H "Authorization: Bearer $JWT" \
+          -H 'Content-Type: application/json' \
+          -d '{"amount":1000}'
+        ```
+      </TabItem>
+    </Tabs>
+
+    <Example schema="RefundPaymentMethod" title="Body" />
+  </Fragment>
+</ApiColumns>
+
+## Returns
+
+<ApiColumns>
+  **`204 No Content`**: the refund was requested. Wait for
+  [`payment_refunded`](/webhooks/events/payment-refunded/) to confirm it.
+
+  **`400 Bad Request`** or **`409 Conflict`**: nothing was refunded. Common messages:
+
+  | Status | Message | What to check |
+  | --- | --- | --- |
+  | `400` | `The refund amount must be greater than 0.` | `amount` is `0` or less. |
+  | `400` | `Requested refund amount exceeds the refundable amount.` | `amount` is more than what's left to refund. |
+  | `400` | `A card payment was expected but it could not be found.` | The payment method has no card payment to refund. |
+  | `400` | `Unable to refund payment method.` | The payment method isn't a card payment method. |
+  | `409` | `A refund is already in progress. Please wait for it to complete.` | Wait for the earlier refund's webhook, then try again. |
+
+  <Fragment slot="code">
+    ```http title="Response"
+    HTTP/1.1 204 No Content
+    ```
+  </Fragment>
+</ApiColumns>

@@ -1,0 +1,67 @@
+---
+title: Payment in bank
+description: "The payment_in_bank webhook. Sent when PonchoPay finds the payment in the provider's bank account."
+tableOfContents: false
+sidebar:
+  order: 4
+---
+
+{/* Generated from one template; keep the structure the same across event pages. */}
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import Event from '../../../../components/Event.astro';
+import ApiColumns from '../../../../components/ApiColumns.astro';
+import Fields from '../../../../components/Fields.astro';
+import Example from '../../../../components/Example.astro';
+import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  Sent when PonchoPay finds the payment in the provider's bank account, as part of reconciliation.
+  The money has been collected and is available to the provider.
+
+  Until this point, a payment the parent reported as made outside PonchoPay might not actually have
+  been made. Payments made with an express checkout method are guaranteed by now.
+
+  Not every payment gets this event. Use it to mark the payment as reconciled or settled.
+
+  <Fragment slot="code">
+    <Event name="payment_in_bank" setting="Payment in bank" />
+  </Fragment>
+</ApiColumns>
+
+## The event
+
+<ApiColumns>
+  PonchoPay sends a `POST` with the [standard headers](/webhooks/overview/#request-format) and a
+  [PaymentCallback](/objects/payment-callback/) body, with `event` set to `payment_in_bank`:
+
+  <Fields schema="PaymentCallback" />
+
+  <Fragment slot="code">
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_in_bank' }} />
+    The values are examples. `request.metadata` is the `metadata` you sent when you created the
+    payment.
+  </Fragment>
+</ApiColumns>
+
+## Handle the webhook
+
+<WebhookHandler />
+
+## Test it
+
+<ApiColumns>
+  On the demo environment, complete a payment, then use **Mark in bank** at the end of its row on
+  the [payments page](https://demo.ponchopay.com/provider/admin/payments). Only completed payments
+  can be marked in bank. In production this happens when bank reconciliation runs.
+
+  See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Webhooks overview"
+      description="How this event fits into the payment lifecycle, and every other event."
+      href="/webhooks/overview/"
+    />
+  </Fragment>
+</ApiColumns>

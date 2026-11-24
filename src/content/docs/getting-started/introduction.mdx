@@ -1,0 +1,95 @@
+---
+title: Introduction
+description: How the PonchoPay API fits together, the environments, and how to set up your account and integration key.
+sidebar:
+  order: 1
+---
+
+import { Aside, Steps, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+The PonchoPay API lets your system take childcare payments through PonchoPay: cards, Pay by Bank,
+Tax-Free Childcare and childcare vouchers, in one checkout. You create payments and recurring
+payments from your server, send parents to the PonchoPay checkout, and PonchoPay tells you as each
+payment moves through its lifecycle.
+
+## How it fits together
+
+The API has three kinds of connection:
+
+- **[Endpoints](/endpoints/initiate-payment/)** send information to PonchoPay: create a payment or
+  recurring payment, check a location, update, refund or cancel.
+- **[Webhooks](/webhooks/overview/)** send information from PonchoPay to your server as payments
+  progress: captured, completed, in bank, refunded and so on.
+- **[Redirects](/redirects/payment-completed/)** send the parent back to your site when they've
+  finished paying.
+
+You set your webhook and redirect URLs in the PonchoPay admin, under **Settings → API
+integration**.
+
+SDKs for [Node.js](/sdks/nodejs/), [PHP](/sdks/php/) and the [browser](/sdks/browser/) handle the
+signing and requests for you.
+
+## Environments
+
+| Environment | Base URL                          | Admin                                      |
+| ----------- | --------------------------------- | ------------------------------------------ |
+| Demo        | `https://demo.ponchopay.com/api/` | https://demo.ponchopay.com/provider/admin |
+| Production  | `https://pay.ponchopay.com/api/`  | https://pay.ponchopay.com/provider/admin  |
+
+All requests must use HTTPS. Build and test against demo, where you can pay with
+[test cards and credentials](/getting-started/testing/), then switch the base URL and integration
+key for production.
+
+<Aside title="Try it straight away">
+  You can create test payments on demo before you have an account, with this shared integration
+  key and the test location URNs `INTTEST` and `INTTEST2`:
+
+  `8X8E9zZblEAV9A0PKcEdWk6j5FeLUkjHaLmuiXkfTPWnsw2CedX8pG1WY/ydKjs9`
+
+  To receive webhooks you need your own demo account. Email
+  [support@ponchopay.com](mailto:support@ponchopay.com) to get one.
+</Aside>
+
+## Set up your account
+
+<Steps>
+
+1. **Create your user account.** Open the admin for the environment (see the table above). When
+   asked to log in, choose **Sign up**, and use the email address you gave your account manager. If
+   you haven't given one, email [support@ponchopay.com](mailto:support@ponchopay.com).
+
+2. **Turn on payment methods.** In **Settings**, turn on at least one payment method. You can't
+   create payments until you do.
+
+   Apple Pay is turned on for you. If you'd rather not accept it, tell your account manager.
+   Google Pay needs your Google payments merchant ID: [find it](https://support.google.com/paymentscenter/answer/7163092?hl=en-GB)
+   and send it to your account manager.
+
+3. **Get your integration key.** In **Settings → API integration**, tick **Enable API
+   integration** and save. Refresh the page and copy the integration key.
+
+4. **Set your URLs.** On the same page, add the [webhook](/webhooks/overview/) URLs you want to
+   receive and your [redirect](/redirects/payment-completed/) URLs.
+
+</Steps>
+
+<Aside type="danger" title="Keep your integration key secret">
+  Your integration key is a 64-character string that signs every request and webhook. Keep it on
+  your server, for example in an environment variable. Never put it in browser code, a mobile app
+  or a public repository.
+</Aside>
+
+## Next steps
+
+<CardGrid>
+  <LinkCard
+    title="Authentication"
+    description="How to sign requests with your integration key."
+    href="/getting-started/authentication/"
+  />
+  <LinkCard
+    title="Initiate a payment"
+    description="Create your first payment and send the parent to checkout."
+    href="/endpoints/initiate-payment/"
+  />
+</CardGrid>

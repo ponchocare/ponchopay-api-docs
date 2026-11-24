@@ -1,0 +1,129 @@
+---
+title: Webhooks overview
+description: How PonchoPay tells your system about each payment as it moves through its lifecycle, and how to verify and handle webhooks.
+tableOfContents: false
+sidebar:
+  label: Overview
+---
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+import WebhookHandler from '../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  PonchoPay sends webhooks to your server as payments and recurring payments move on: when the
+  parent leaves their card, when the payment completes, when the money reaches the provider's bank,
+  and when anything changes. Handling them keeps your system in step with PonchoPay, so you don't
+  miss payments or chase parents who've already paid.
+
+  Each event has its own URL. Set the ones you want in the PonchoPay admin under **Settings → API
+  integration**. You can use the same URL for several events: the body's `event` field says which
+  one it is.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Start with payment_completed"
+      description="The event most integrations act on: the payment is done."
+      href="/webhooks/events/payment-completed/"
+    />
+  </Fragment>
+</ApiColumns>
+
+## Payment lifecycle
+
+<ApiColumns>
+  Four events follow a payment from checkout to the provider's bank:
+
+  1. [`payment_captured`](/webhooks/events/payment-captured/): the parent finished card checkout, or
+     left their card as a guarantee for a Tax-Free Childcare or voucher payment.
+  2. [`payment_reported_complete`](/webhooks/events/payment-reported-complete/): the parent says
+     they've paid outside PonchoPay, with Standard Tax-Free Childcare or vouchers. It's their claim,
+     backed by the card guarantee.
+  3. [`payment_completed`](/webhooks/events/payment-completed/): the payment is done. For Standard
+     Tax-Free Childcare and vouchers this only comes once PonchoPay finds the money in the bank,
+     which can be 2 or more days later.
+  4. [`payment_in_bank`](/webhooks/events/payment-in-bank/): PonchoPay found the payment in the
+     provider's bank account. Not available for every payment.
+
+  Which ones you get, and when, depends on how the parent paid.
+
+  <details>
+  <summary>Legacy lifecycle (before 25 April 2025)</summary>
+
+  Integrations set up before 25 April 2025 may still use the old lifecycle, which has no
+  `payment_reported_complete`. In it, `payment_completed` is sent as soon as the parent reports a
+  Standard Tax-Free Childcare or voucher payment as paid, not when the money is confirmed. To move
+  to the current lifecycle, email [support@ponchopay.com](mailto:support@ponchopay.com).
+
+  </details>
+
+  <Fragment slot="code">
+    ```txt title="Card, Apple Pay, Google Pay, Klarna, Pay by Bank, Express TFC"
+    checkout finished      → payment_captured
+                           → payment_completed
+    money found in bank    → payment_in_bank
+    ```
+
+    ```txt title="Standard Tax-Free Childcare, childcare vouchers"
+    card guarantee left    → payment_captured
+    parent reports paid    → payment_reported_complete
+    money found in bank    → payment_completed
+                           → payment_in_bank
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Changes to a payment
+
+<ApiColumns>
+  These events tell you when something about a payment changes. Not every payment can be changed.
+
+  - [`payment_updated`](/webhooks/events/payment-updated/): the amount or a payment method changed,
+    for example through [Update a payment method](/endpoints/update-payment-method/).
+  - [`payment_refunded`](/webhooks/events/payment-refunded/): all or part of the payment was
+    refunded.
+  - [`payment_cancelled`](/webhooks/events/payment-cancelled/): the payment was cancelled.
+
+  All payment events send a [PaymentCallback](/objects/payment-callback/) body.
+</ApiColumns>
+
+## Recurring payments
+
+<ApiColumns>
+  Recurring payments (subscriptions) have their own events, with a
+  [SubscriptionCallback](/objects/subscription-callback/) body:
+
+  - [`recurring_payment_captured`](/webhooks/events/recurring-payment-captured/): the parent left a
+    card as a guarantee.
+  - [`recurring_payment_set_up`](/webhooks/events/recurring-payment-set-up/): the recurring payment
+    is ready to take payments.
+  - [`recurring_payment_cancel`](/webhooks/events/recurring-payment-cancel/): the recurring payment
+    was cancelled.
+</ApiColumns>
+
+## Verify and handle webhooks
+
+<WebhookHandler />
+
+## Request format
+
+<ApiColumns>
+  Every webhook is a `POST` with a JSON body and these headers:
+
+  <Fields schema="WebhookHeaders" />
+
+  Respond with any `2xx` status. PonchoPay records your response, and an event can be resent from
+  PonchoPay with the same `id`, so make your handler safe to run twice.
+
+  <Fragment slot="code">
+    ```http title="Example request"
+    POST /webhooks/ponchopay HTTP/1.1
+    Content-Type: application/json
+    User-Agent: PonchoPay/<version>
+    Signature: <base64url HMAC-SHA256 of the body>
+
+    {"id":"…","date":"…","event":"payment_completed","payment":{…},"request":{…}}
+    ```
+  </Fragment>
+</ApiColumns>

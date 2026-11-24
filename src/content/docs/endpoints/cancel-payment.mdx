@@ -1,0 +1,104 @@
+---
+title: Cancel a payment
+description: Cancel a payment so the parent can no longer pay it.
+tableOfContents: false
+sidebar:
+  label: Cancel payment
+  order: 6
+  badge:
+    text: PUT
+    variant: caution
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Endpoint from '../../../components/Endpoint.astro';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+
+<ApiColumns>
+  Cancels a payment so the parent can no longer pay it, for example when a booking is cancelled
+  before the parent has paid. To give money back on a payment that's been paid, use
+  [Refund a payment method](/endpoints/refund-payment-method/).
+
+  PonchoPay sends [`payment_cancelled`](/webhooks/events/payment-cancelled/) after the change.
+
+  <Fragment slot="code">
+    <Endpoint method="PUT" path="/api/payment/{id}/cancel" />
+  </Fragment>
+</ApiColumns>
+
+## Authentication
+
+<ApiColumns>
+  Send a [management JWT](/getting-started/authentication/#management-jwt) in the `Authorization`
+  header. There's no body, so `sig` is the hash of an empty string. The SDKs build the token for
+  you.
+
+  <Fragment slot="code">
+    ```http
+    PUT /api/payment/{id}/cancel
+    Authorization: Bearer <jwt>
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Parameters
+
+<ApiColumns>
+  <Fields schema="PaymentPath" />
+
+  This endpoint has no body.
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { Client } from '@ponchopay/pp-nodejs';
+
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+
+        await client.cancelPayment('6d2f1c7e-8a4b-4f0e-b3a9-5c8e1d2f7a60', {
+          urn: 'INTTEST',
+          email: 'admin@club.example.com',
+        });
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use PonchoPay\Client;
+
+        $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+
+        $client->cancelPayment('6d2f1c7e-8a4b-4f0e-b3a9-5c8e1d2f7a60', [
+            'urn' => 'INTTEST',
+            'email' => 'admin@club.example.com',
+        ]);
+        ```
+      </TabItem>
+      <TabItem label="cURL">
+        ```bash
+        # $JWT: a management JWT signed over an empty body
+        curl -X PUT https://demo.ponchopay.com/api/payment/6d2f1c7e-8a4b-4f0e-b3a9-5c8e1d2f7a60/cancel \
+          -H "Authorization: Bearer $JWT"
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>
+
+## Returns
+
+<ApiColumns>
+  **`204 No Content`**: the payment was cancelled.
+
+  **`400 Bad Request`**: the payment couldn't be cancelled. An invalid or expired token, or a
+  payment that doesn't belong to the token's location, is also rejected.
+
+  <Fragment slot="code">
+    ```http title="Response"
+    HTTP/1.1 204 No Content
+    ```
+  </Fragment>
+</ApiColumns>

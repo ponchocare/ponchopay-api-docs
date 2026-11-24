@@ -1,0 +1,66 @@
+---
+title: Payment refunded
+description: "The payment_refunded webhook. Sent when all or part of a payment is refunded."
+tableOfContents: false
+sidebar:
+  order: 6
+---
+
+{/* Generated from one template; keep the structure the same across event pages. */}
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import Event from '../../../../components/Event.astro';
+import ApiColumns from '../../../../components/ApiColumns.astro';
+import Fields from '../../../../components/Fields.astro';
+import Example from '../../../../components/Example.astro';
+import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  Sent when all or part of a payment is refunded, through
+  [Refund a payment method](/endpoints/refund-payment-method/) or the admin. A payment refunded in
+  several parts sends one event per refund. Not every payment can be refunded.
+
+  - `payment.refunded_amount` is the amount of **this** refund.
+  - `payment.refunded_total` is the total refunded so far.
+  - In `payment_methods`, the same two fields show which method the refund came from.
+
+  <Fragment slot="code">
+    <Event name="payment_refunded" setting="Payment refunded" />
+  </Fragment>
+</ApiColumns>
+
+## The event
+
+<ApiColumns>
+  PonchoPay sends a `POST` with the [standard headers](/webhooks/overview/#request-format) and a
+  [PaymentCallback](/objects/payment-callback/) body, with `event` set to `payment_refunded`:
+
+  <Fields schema="PaymentCallback" />
+
+  <Fragment slot="code">
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_refunded', 'payment.refunded_amount': 1000, 'payment.refunded_total': 1000, 'payment.payment_methods.0.refunded_amount': 1000, 'payment.payment_methods.0.refunded_total': 1000 }} />
+    The values are examples. `request.metadata` is the `metadata` you sent when you created the
+    payment.
+  </Fragment>
+</ApiColumns>
+
+## Handle the webhook
+
+<WebhookHandler />
+
+## Test it
+
+<ApiColumns>
+  On the demo environment, pay with a [test card](/getting-started/testing/#test-cards), then call
+  [Refund a payment method](/endpoints/refund-payment-method/) or refund it from the admin.
+
+  See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Webhooks overview"
+      description="How this event fits into the payment lifecycle, and every other event."
+      href="/webhooks/overview/"
+    />
+  </Fragment>
+</ApiColumns>

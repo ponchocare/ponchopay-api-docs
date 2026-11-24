@@ -1,0 +1,62 @@
+---
+title: Recurring payment captured
+description: "The recurring_payment_captured webhook. Sent when the parent leaves a card as a guarantee for a recurring payment."
+tableOfContents: false
+sidebar:
+  order: 8
+---
+
+{/* Generated from one template; keep the structure the same across event pages. */}
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import Event from '../../../../components/Event.astro';
+import ApiColumns from '../../../../components/ApiColumns.astro';
+import Fields from '../../../../components/Fields.astro';
+import Example from '../../../../components/Example.astro';
+import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  Sent when the parent leaves their card details for a recurring payment. From this point the
+  payments it takes can be guaranteed, as long as payment guarantee is turned on in your settings.
+  Not sent if payment guarantee is turned off.
+
+  <Fragment slot="code">
+    <Event name="recurring_payment_captured" setting="Recurring payment captured" />
+  </Fragment>
+</ApiColumns>
+
+## The event
+
+<ApiColumns>
+  PonchoPay sends a `POST` with the [standard headers](/webhooks/overview/#request-format) and a
+  [SubscriptionCallback](/objects/subscription-callback/) body, with `event` set to `recurring_payment_captured`:
+
+  <Fields schema="SubscriptionCallback" />
+
+  <Fragment slot="code">
+    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_captured' }} />
+    The values are examples. `request.metadata` is the `metadata` you sent when you created the
+    recurring payment.
+  </Fragment>
+</ApiColumns>
+
+## Handle the webhook
+
+<WebhookHandler />
+
+## Test it
+
+<ApiColumns>
+  On the demo environment, [initiate a subscription](/endpoints/initiate-subscription/) and enter
+  a [test card](/getting-started/testing/#test-cards) while setting it up.
+
+  See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Webhooks overview"
+      description="How this event fits into the payment lifecycle, and every other event."
+      href="/webhooks/overview/"
+    />
+  </Fragment>
+</ApiColumns>

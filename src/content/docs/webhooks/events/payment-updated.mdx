@@ -1,0 +1,66 @@
+---
+title: Payment updated
+description: "The payment_updated webhook. Sent when the amount or a payment method of a payment changes."
+tableOfContents: false
+sidebar:
+  order: 5
+---
+
+{/* Generated from one template; keep the structure the same across event pages. */}
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import Event from '../../../../components/Event.astro';
+import ApiColumns from '../../../../components/ApiColumns.astro';
+import Fields from '../../../../components/Fields.astro';
+import Example from '../../../../components/Example.astro';
+import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  Sent when the amount of a payment or one of its payment methods changes in PonchoPay, for
+  example through [Update a payment method](/endpoints/update-payment-method/) or in the admin. Not
+  every payment can be updated.
+
+  The body has an extra `updates` field listing what changed, as JSON paths into the body, such as
+  `$.payment.amount` or `$.payment.payment_methods[0]`. Update your copy of the payment from the
+  `payment` object.
+
+  <Fragment slot="code">
+    <Event name="payment_updated" setting="Payment updated" />
+  </Fragment>
+</ApiColumns>
+
+## The event
+
+<ApiColumns>
+  PonchoPay sends a `POST` with the [standard headers](/webhooks/overview/#request-format) and a
+  [PaymentCallback](/objects/payment-callback/) body, with `event` set to `payment_updated`:
+
+  <Fields schema="PaymentCallback" />
+
+  <Fragment slot="code">
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_updated', updates: ['$.payment.payment_methods[0]'], 'payment.method': 'childcare_vouchers', 'payment.payment_methods.0.type': 'childcare_vouchers', 'payment.payment_methods.0.variant': 'edenred' }} />
+    The values are examples. `request.metadata` is the `metadata` you sent when you created the
+    payment.
+  </Fragment>
+</ApiColumns>
+
+## Handle the webhook
+
+<WebhookHandler />
+
+## Test it
+
+<ApiColumns>
+  On the demo environment, call [Update a payment method](/endpoints/update-payment-method/) for
+  one of your test payments, or change it in the admin.
+
+  See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Webhooks overview"
+      description="How this event fits into the payment lifecycle, and every other event."
+      href="/webhooks/overview/"
+    />
+  </Fragment>
+</ApiColumns>

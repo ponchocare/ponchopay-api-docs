@@ -1,0 +1,214 @@
+---
+title: Initiate a subscription
+description: Create a recurring payment in PonchoPay and get the URL where the parent sets it up.
+tableOfContents: false
+sidebar:
+  label: Initiate subscription
+  order: 3
+  badge:
+    text: POST
+    variant: success
+---
+
+import { Tabs, TabItem, Aside, LinkCard } from '@astrojs/starlight/components';
+import Endpoint from '../../../components/Endpoint.astro';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+<ApiColumns>
+  Creates a recurring payment (subscription) for one of your locations, such as a monthly
+  membership or termly fees, and redirects to the page where the parent sets it up. The response is
+  a `302` redirect: send the parent to the URL in the `Location` header.
+
+  If you include an `additional_one_time_payment`, for example a registration fee, the parent pays
+  that first and then sets up the recurring payment.
+
+  Like [Initiate a payment](/endpoints/initiate-payment/), you can call it from your server or post
+  a form to it from the browser with the
+  [`<pp-subscription>`](/sdks/browser/#pp-subscription)
+  web component. Either way, your server computes the `token`.
+
+  <Fragment slot="code">
+    <Endpoint method="POST" path="/api/integration/generic/subscription/redirect" />
+  </Fragment>
+</ApiColumns>
+
+## Authentication
+
+<ApiColumns>
+  Include a `token` field computed from your integration key and the request's `metadata`. See
+  [initiation token](/getting-started/authentication/#initiation-token). The additional payment's
+  `metadata` isn't part of the token.
+
+  <Fragment slot="code">
+    ```txt
+    token = base64( sha256( metadata + "." + integrationKey ) )
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Parameters
+
+<ApiColumns>
+  Send the parameters as JSON (`Content-Type: application/json`) or as form data
+  (`application/x-www-form-urlencoded` or `multipart/form-data`). In form data, use square
+  brackets for nested values: `repetition[granularity]=month`, `repetition[weekdays][]=monday`.
+
+  <Fields schema="InitiateSubscription" />
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { Client } from '@ponchopay/pp-nodejs';
+
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+        // Demo: new Client(key, 'https://demo.ponchopay.com/')
+
+        // Computes the token and returns the URL to send the parent to.
+        const setUpUrl = await client.initiateSubscription({
+          urn: 'INTTEST',
+          amount: 8500, // £85.00 a month
+          metadata: 'membership-2291',
+          email: 'parent@example.com',
+          repetition: { granularity: 'month', period: 1, day: 1 },
+          ending: { condition: 'occurrences', occurrences: 12 },
+        });
+
+        res.redirect(setUpUrl); // e.g. Express
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use PonchoPay\Client;
+
+        $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+        // Demo: new Client($key, 'https://demo.ponchopay.com/')
+
+        // Computes the token and returns the URL to send the parent to.
+        $setUpUrl = $client->initiateSubscription([
+            'urn' => 'INTTEST',
+            'amount' => 8500, // £85.00 a month
+            'metadata' => 'membership-2291',
+            'email' => 'parent@example.com',
+            'repetition' => ['granularity' => 'month', 'period' => 1, 'day' => 1],
+            'ending' => ['condition' => 'occurrences', 'occurrences' => 12],
+        ]);
+
+        header('Location: ' . $setUpUrl, true, 302);
+        ```
+      </TabItem>
+      <TabItem label="pp-browser">
+        ```html
+        <script src="https://pay.ponchopay.com/api/integration/generic/asset/pp-browser.1.3.1.min.js"></script>
+
+        <!-- Demo: add base="https://demo.ponchopay.com/" -->
+        <pp-subscription
+          token="TOKEN_FROM_YOUR_SERVER"
+          urn="INTTEST"
+          amount="8500"
+          metadata="membership-2291"
+          email="parent@example.com"
+          repetition.granularity="month"
+          repetition.period="1"
+          repetition.day="1"
+          ending.condition="occurrences"
+          ending.occurrences="12"
+        >Set up monthly payments</pp-subscription>
+        ```
+      </TabItem>
+      <TabItem label="HTML form">
+        ```html
+        <form method="post" action="https://pay.ponchopay.com/api/integration/generic/subscription/redirect">
+          <input type="hidden" name="token" value="TOKEN_FROM_YOUR_SERVER" />
+          <input type="hidden" name="urn" value="INTTEST" />
+          <input type="hidden" name="amount" value="8500" />
+          <input type="hidden" name="metadata" value="membership-2291" />
+          <input type="hidden" name="email" value="parent@example.com" />
+          <input type="hidden" name="repetition[granularity]" value="month" />
+          <input type="hidden" name="repetition[period]" value="1" />
+          <input type="hidden" name="repetition[day]" value="1" />
+          <input type="hidden" name="ending[condition]" value="occurrences" />
+          <input type="hidden" name="ending[occurrences]" value="12" />
+          <button type="submit">Set up monthly payments</button>
+        </form>
+        ```
+      </TabItem>
+      <TabItem label="cURL">
+        ```bash
+        curl -i https://demo.ponchopay.com/api/integration/generic/subscription/redirect \
+          -H 'Content-Type: application/json' \
+          -d '{
+            "urn": "INTTEST",
+            "amount": 8500,
+            "metadata": "membership-2291",
+            "email": "parent@example.com",
+            "repetition": { "granularity": "month", "period": 1, "day": 1 },
+            "token": "'"$TOKEN"'"
+          }'
+        ```
+      </TabItem>
+    </Tabs>
+
+    <Example
+      schema="InitiateSubscription"
+      title="Body with an ending and a registration fee"
+      include={['ending', 'additional_one_time_payment']}
+    />
+
+    <Example
+      schema="SubscriptionRepetition"
+      title="Repetition: every Monday and Thursday"
+      overrides={{ granularity: 'week', day: null, weekdays: ['monday', 'thursday'] }}
+    />
+  </Fragment>
+</ApiColumns>
+
+## Returns
+
+<ApiColumns>
+  **`302 Found`**: the recurring payment was created. Send the parent to the URL in the `Location`
+  header. It's the additional payment's checkout if you sent `additional_one_time_payment`,
+  otherwise the recurring payment set-up page.
+
+  **`400 Bad Request`**: nothing was created. The response says why. Common messages:
+
+  | Message | What to check |
+  | --- | --- |
+  | `Invalid token or provider not setup` | The token was computed with the wrong key or different `metadata`, or the `urn` isn't one of your locations. |
+  | `Provider location not verified` | The location hasn't finished verification. Check with [Validate location](/endpoints/validate-location/). |
+  | `Payments not enabled` | No payment methods are turned on for the provider. |
+  | `The amount value is invalid` | `amount` isn't a valid amount in pence. |
+  | `Invalid repetition` | `repetition` is missing a field its `granularity` needs, or has an unknown `granularity`. |
+  | `Invalid ending` | `ending` is missing a field its `condition` needs, or has an unknown `condition`. |
+  | `Consider an open-ending subscription` | `ending.date` is too far ahead. Use `"condition": "never"` instead. |
+  | `Invalid body` | A parameter is missing or the wrong type. |
+
+  <Fragment slot="code">
+    ```http title="Response"
+    HTTP/1.1 302 Found
+    Location: <set-up URL, or the additional payment's checkout URL>
+    ```
+  </Fragment>
+</ApiColumns>
+
+## What happens next
+
+<ApiColumns>
+  When the parent leaves a card as a guarantee you get
+  [`recurring_payment_captured`](/webhooks/events/recurring-payment-captured/). When everything
+  needed to take payments is in place you get
+  [`recurring_payment_set_up`](/webhooks/events/recurring-payment-set-up/), and the parent is sent to
+  your **Subscription set up** [redirect](/redirects/subscription-set-up/) URL.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="recurring_payment_set_up"
+      description="The webhook that tells you the recurring payment is ready."
+      href="/webhooks/events/recurring-payment-set-up/"
+    />
+  </Fragment>
+</ApiColumns>

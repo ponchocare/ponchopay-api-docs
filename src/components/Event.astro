@@ -1,0 +1,75 @@
+---
+/**
+ * Webhook event header: event name, delivery method and where the URL is configured.
+ *
+ * <Event name="payment_completed" setting="Payment completed" />
+ */
+interface Props {
+  name: string;
+  setting: string;
+}
+
+const { name, setting } = Astro.props;
+---
+
+<div class="pp-event not-content">
+  <div class="pp-event__line">
+    <span class="pp-method pp-method--post">POST</span>
+    <code class="pp-event__name">{name}</code>
+  </div>
+  <dl class="pp-event__facts">
+    <div>
+      <dt>Sent to</dt>
+      <dd>The <strong>{setting}</strong> callback URL in <em>Settings → API integration</em></dd>
+    </div>
+    <div>
+      <dt>Body</dt>
+      <dd>JSON, signed with your integration key</dd>
+    </div>
+  </dl>
+</div>
+
+<style>
+  .pp-event {
+    margin-block: 1.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--pp-radius-button);
+    background-color: var(--pp-surface-card);
+    box-shadow: inset 0 0 0 2px var(--pp-outline), 8px 8px 0 0 var(--pp-ink);
+  }
+  .pp-event__line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .pp-event__name {
+    font-size: var(--sl-text-lg);
+    font-weight: 600;
+    color: var(--sl-color-white);
+    background: none;
+    padding: 0;
+  }
+  .pp-event__facts {
+    margin: 0.75rem 0 0;
+    display: grid;
+    gap: 0.25rem;
+    font-size: var(--sl-text-sm);
+  }
+  .pp-event__facts div {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0.5rem;
+  }
+  .pp-event__facts dt {
+    color: var(--sl-color-gray-3);
+  }
+  .pp-event__facts dd {
+    margin: 0;
+  }
+  @media (max-width: 30rem) {
+    .pp-event__facts div {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>

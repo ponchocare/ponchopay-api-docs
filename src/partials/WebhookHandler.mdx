@@ -1,0 +1,117 @@
+{/*
+  How to verify and handle a webhook. Shared by the webhooks overview and every event page, so the
+  handler code is written once. Import it and render <WebhookHandler />.
+*/}
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import ApiColumns from '../components/ApiColumns.astro';
+
+<ApiColumns>
+  1. Read the body as a raw string. Don't parse it and re-serialise it, as that changes the bytes
+     and the signature won't match.
+  2. Compute the HMAC-SHA256 of the raw body using your integration key, encoded as URL-safe
+     Base64 without padding ([RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648#section-5)).
+  3. Compare it with the `signature` header, using a constant-time comparison. If they don't match,
+     reject the request.
+  4. Parse the JSON. Skip it if you've already handled its `id`, then act on its `event`.
+  5. Respond quickly with a `2xx` status. Do slow work, such as sending emails, after responding.
+
+  <Aside type="caution" title="Expect duplicates">
+    The same event can reach you more than once, for example when it's resent from PonchoPay. A
+    resent event keeps its original `id` and `date`, so store the `id`s you've handled and skip
+    repeats.
+  </Aside>
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        // Fetch API Request: Next.js route handlers, Hono, Remix…
+        import { parseCallback } from '@ponchopay/pp-nodejs';
+
+        export async function POST(request: Request) {
+          let event;
+          try {
+            // Throws if the signature doesn't match.
+            event = await parseCallback(process.env.PONCHOPAY_INTEGRATION_KEY!, request);
+          } catch {
+            return new Response('Invalid signature', { status: 401 });
+          }
+
+          if (!(await alreadyHandled(event.id))) {
+            await handleEvent(event); // switch on event.event
+          }
+          return new Response(null, { status: 204 });
+        }
+        ```
+      </TabItem>
+      <TabItem label="Express">
+        ```js
+        import express from 'express';
+        import { createHmac, timingSafeEqual } from 'node:crypto';
+
+        const app = express();
+
+        // express.raw keeps the body as bytes so the signature can be checked.
+        app.post('/webhooks/ponchopay', express.raw({ type: 'application/json' }), async (req, res) => {
+          const payload = req.body.toString('utf8');
+          const expected = createHmac('sha256', process.env.PONCHOPAY_INTEGRATION_KEY)
+            .update(payload, 'utf8')
+            .digest('base64url');
+          const received = req.get('signature') ?? '';
+
+          if (received.length !== expected.length ||
+              !timingSafeEqual(Buffer.from(received), Buffer.from(expected))) {
+            return res.status(401).send('Invalid signature');
+          }
+
+          const event = JSON.parse(payload);
+          if (!(await alreadyHandled(event.id))) {
+            await handleEvent(event); // switch on event.event
+          }
+          res.sendStatus(204);
+        });
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        $payload = file_get_contents('php://input');
+        $key = getenv('PONCHOPAY_INTEGRATION_KEY');
+
+        $hmac = hash_hmac('sha256', $payload, $key, true);
+        $expected = rtrim(strtr(base64_encode($hmac), '+/', '-_'), '=');
+        $received = $_SERVER['HTTP_SIGNATURE'] ?? '';
+
+        if (!hash_equals($expected, $received)) {
+            http_response_code(401);
+            exit('Invalid signature');
+        }
+
+        $event = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
+        if (!alreadyHandled($event['id'])) {
+            handleEvent($event); // switch on $event['event']
+        }
+        http_response_code(204);
+        ```
+      </TabItem>
+      <TabItem label="Python">
+        ```python
+        import base64, hashlib, hmac, json, os
+
+        def verify_and_parse(raw_body: bytes, signature: str) -> dict:
+            key = os.environ["PONCHOPAY_INTEGRATION_KEY"].encode("utf-8")
+            digest = hmac.new(key, raw_body, hashlib.sha256).digest()
+            expected = base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
+            if not hmac.compare_digest(expected, signature or ""):
+                raise ValueError("Invalid signature")
+            return json.loads(raw_body)
+
+        # In your web framework: pass the raw request body and the "signature"
+        # header, skip events whose "id" you've handled, then respond 204.
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>

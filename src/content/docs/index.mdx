@@ -1,0 +1,52 @@
+---
+title: PonchoPay API
+description: Take cards, Tax-Free Childcare and childcare vouchers in one checkout, and keep your system in sync with webhooks.
+template: splash
+hero:
+  tagline: Take cards, Tax-Free Childcare and childcare vouchers in one checkout. Create payments from your system, send parents to PonchoPay, and get told when the money arrives.
+  actions:
+    - text: Get started
+      # Relative to the homepage so the links work under any base path.
+      link: getting-started/introduction/
+      icon: right-arrow
+      variant: primary
+    - text: Initiate a payment
+      link: endpoints/initiate-payment/
+      variant: secondary
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## How an integration works
+
+<CardGrid>
+  <Card title="1. Create a payment" icon="rocket">
+    Your server signs a request with your integration key and calls
+    [Initiate a payment](/endpoints/initiate-payment/). PonchoPay replies with a checkout URL.
+  </Card>
+  <Card title="2. The parent pays" icon="approve-check">
+    Send the parent to the checkout. They pay by card, Pay by Bank, Tax-Free Childcare or
+    childcare vouchers, or a mix.
+  </Card>
+  <Card title="3. Webhooks keep you in sync" icon="random">
+    PonchoPay calls your URLs as the payment moves on: captured, completed, in bank. Start with
+    [payment_completed](/webhooks/events/payment-completed/).
+  </Card>
+  <Card title="4. Reconciled for you" icon="document">
+    PonchoPay matches Tax-Free Childcare and voucher payments to the provider's bank account and
+    tells you when they're in bank.
+  </Card>
+</CardGrid>
+
+## Environments
+
+| Environment | Base URL                          | Use it for                       |
+| ----------- | --------------------------------- | -------------------------------- |
+| Demo        | `https://demo.ponchopay.com/api/` | Building and testing, test cards |
+| Production  | `https://pay.ponchopay.com/api/`  | Real payments                    |
+
+<LinkCard
+  title="Need a demo account?"
+  description="You can create test payments straight away. To receive webhooks you need a demo account. Email support@ponchopay.com to get one."
+  href="mailto:support@ponchopay.com"
+/>

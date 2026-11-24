@@ -1,0 +1,104 @@
+---
+title: Cancel a subscription
+description: Cancel a recurring payment so it takes no more payments.
+tableOfContents: false
+sidebar:
+  label: Cancel subscription
+  order: 7
+  badge:
+    text: PUT
+    variant: caution
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Endpoint from '../../../components/Endpoint.astro';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+
+<ApiColumns>
+  Cancels a recurring payment (subscription) so it takes no more payments, for example when a
+  child leaves the club. Payments it has already taken aren't affected.
+
+  PonchoPay sends [`recurring_payment_cancel`](/webhooks/events/recurring-payment-cancel/) after
+  the change.
+
+  <Fragment slot="code">
+    <Endpoint method="PUT" path="/api/recursion/{id}/cancel" />
+  </Fragment>
+</ApiColumns>
+
+## Authentication
+
+<ApiColumns>
+  Send a [management JWT](/getting-started/authentication/#management-jwt) in the `Authorization`
+  header. There's no body, so `sig` is the hash of an empty string. The SDKs build the token for
+  you.
+
+  <Fragment slot="code">
+    ```http
+    PUT /api/recursion/{id}/cancel
+    Authorization: Bearer <jwt>
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Parameters
+
+<ApiColumns>
+  <Fields schema="SubscriptionPath" />
+
+  This endpoint has no body.
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { Client } from '@ponchopay/pp-nodejs';
+
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+
+        await client.cancelRecursion('e4b8c2d6-1f3a-4c5e-9b7d-2a6f8e0c4b19', {
+          urn: 'INTTEST',
+          email: 'admin@club.example.com',
+        });
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use PonchoPay\Client;
+
+        $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+
+        $client->cancelRecursion('e4b8c2d6-1f3a-4c5e-9b7d-2a6f8e0c4b19', [
+            'urn' => 'INTTEST',
+            'email' => 'admin@club.example.com',
+        ]);
+        ```
+      </TabItem>
+      <TabItem label="cURL">
+        ```bash
+        # $JWT: a management JWT signed over an empty body
+        curl -X PUT https://demo.ponchopay.com/api/recursion/e4b8c2d6-1f3a-4c5e-9b7d-2a6f8e0c4b19/cancel \
+          -H "Authorization: Bearer $JWT"
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>
+
+## Returns
+
+<ApiColumns>
+  **`204 No Content`**: the recurring payment was cancelled.
+
+  **`400 Bad Request`**: the recurring payment couldn't be cancelled. An invalid or expired token,
+  or a recurring payment that doesn't belong to the token's location, is also rejected.
+
+  <Fragment slot="code">
+    ```http title="Response"
+    HTTP/1.1 204 No Content
+    ```
+  </Fragment>
+</ApiColumns>

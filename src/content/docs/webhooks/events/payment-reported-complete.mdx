@@ -1,0 +1,70 @@
+---
+title: Payment reported complete
+description: "The payment_reported_complete webhook. Sent when the parent says they've paid with Standard Tax-Free Childcare or vouchers."
+tableOfContents: false
+sidebar:
+  order: 2
+---
+
+{/* Generated from one template; keep the structure the same across event pages. */}
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import Event from '../../../../components/Event.astro';
+import ApiColumns from '../../../../components/ApiColumns.astro';
+import Fields from '../../../../components/Fields.astro';
+import Example from '../../../../components/Example.astro';
+import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  Sent when the parent tells PonchoPay they've paid with Standard Tax-Free Childcare or childcare
+  vouchers. They pay on the government's or the voucher provider's site, so PonchoPay can't see the
+  payment yet.
+
+  This is the parent's claim, not proof. The card they left as a guarantee backs it up. When
+  PonchoPay finds the money in the provider's bank, you get
+  [`payment_completed`](/webhooks/events/payment-completed/).
+
+  Use it to show the payment as pending. Don't treat it as paid yet.
+
+  <Fragment slot="code">
+    <Event name="payment_reported_complete" setting="Payment reported complete" />
+  </Fragment>
+</ApiColumns>
+
+## The event
+
+<ApiColumns>
+  PonchoPay sends a `POST` with the [standard headers](/webhooks/overview/#request-format) and a
+  [PaymentCallback](/objects/payment-callback/) body, with `event` set to `payment_reported_complete`:
+
+  <Fields schema="PaymentCallback" />
+
+  <Fragment slot="code">
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_reported_complete', 'payment.method': 'tax_free_childcare', 'payment.payment_methods.0.type': 'tax_free_childcare', 'payment.payment_methods.0.variant': 'manual' }} />
+    The values are examples. `request.metadata` is the `metadata` you sent when you created the
+    payment.
+  </Fragment>
+</ApiColumns>
+
+## Handle the webhook
+
+<WebhookHandler />
+
+## Test it
+
+<ApiColumns>
+  On the demo environment, [initiate a payment](/endpoints/initiate-payment/), choose Standard
+  Tax-Free Childcare or vouchers in checkout, leave a test card, and report the payment as complete.
+  Any reference in the [standard reference format](/getting-started/testing/#tax-free-childcare)
+  works.
+
+  See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Webhooks overview"
+      description="How this event fits into the payment lifecycle, and every other event."
+      href="/webhooks/overview/"
+    />
+  </Fragment>
+</ApiColumns>

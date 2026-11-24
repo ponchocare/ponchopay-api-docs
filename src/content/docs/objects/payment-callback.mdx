@@ -1,0 +1,17 @@
+---
+title: PaymentCallback
+description: The body of every payment webhook PonchoPay sends.
+---
+
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+The body of every payment webhook. It's sent as JSON with a `signature` header so you can check it came from PonchoPay: see [handling a webhook](/webhooks/events/payment-completed/#handle-the-webhook).
+
+Headers: `signature` (HMAC-SHA256 of the raw body), `content-type: application/json` and `user-agent: PonchoPay/<version>`.
+
+<Fields schema="PaymentCallback" />
+
+## Example
+
+<Example schema="PaymentCallback" />

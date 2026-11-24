@@ -1,0 +1,15 @@
+---
+title: LineItem
+description: One item a payment is for. Line items are required to offer Klarna.
+---
+
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+One item a payment is for. Send a list of them as `line_items` when you [initiate a payment](/endpoints/initiate-payment/). The sum of `amount × quantity` across all items must equal the payment's `amount`, or the request is rejected.
+
+<Fields schema="LineItem" />
+
+## Example
+
+<Example schema="LineItem" complete />

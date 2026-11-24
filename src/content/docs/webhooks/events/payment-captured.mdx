@@ -1,0 +1,69 @@
+---
+title: Payment captured
+description: "The payment_captured webhook. Sent when the parent finishes card checkout or leaves a card as a guarantee."
+tableOfContents: false
+sidebar:
+  order: 1
+---
+
+{/* Generated from one template; keep the structure the same across event pages. */}
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import Event from '../../../../components/Event.astro';
+import ApiColumns from '../../../../components/ApiColumns.astro';
+import Fields from '../../../../components/Fields.astro';
+import Example from '../../../../components/Example.astro';
+import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  Sent when PonchoPay has the parent's card details. From this point the payment is guaranteed,
+  even if the parent doesn't finish, as long as payment guarantee is turned on in your settings.
+
+  - **Card, Apple Pay, Google Pay, Klarna, Pay by Bank or Express Tax-Free Childcare**: sent when
+    checkout finishes, at the same time as [`payment_completed`](/webhooks/events/payment-completed/).
+  - **Standard Tax-Free Childcare or childcare vouchers**: sent when the parent leaves their card as
+    a guarantee, before they pay outside PonchoPay. Not sent if payment guarantee is turned off.
+
+  Use it to hold the place or booking. Wait for `payment_completed` before treating the payment as
+  paid.
+
+  <Fragment slot="code">
+    <Event name="payment_captured" setting="Payment captured" />
+  </Fragment>
+</ApiColumns>
+
+## The event
+
+<ApiColumns>
+  PonchoPay sends a `POST` with the [standard headers](/webhooks/overview/#request-format) and a
+  [PaymentCallback](/objects/payment-callback/) body, with `event` set to `payment_captured`:
+
+  <Fields schema="PaymentCallback" />
+
+  <Fragment slot="code">
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_captured' }} />
+    The values are examples. `request.metadata` is the `metadata` you sent when you created the
+    payment.
+  </Fragment>
+</ApiColumns>
+
+## Handle the webhook
+
+<WebhookHandler />
+
+## Test it
+
+<ApiColumns>
+  On the demo environment, [initiate a payment](/endpoints/initiate-payment/) and enter a
+  [test card](/getting-started/testing/#test-cards) in checkout.
+
+  See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Webhooks overview"
+      description="How this event fits into the payment lifecycle, and every other event."
+      href="/webhooks/overview/"
+    />
+  </Fragment>
+</ApiColumns>

@@ -1,0 +1,15 @@
+---
+title: SubscriptionCallback
+description: The body of every recurring payment webhook PonchoPay sends.
+---
+
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+The body of every [recurring payment webhook](/webhooks/overview/#recurring-payments). It's sent as JSON with the [standard headers](/webhooks/overview/#request-format), including a `signature` to verify.
+
+<Fields schema="SubscriptionCallback" />
+
+## Example
+
+<Example schema="SubscriptionCallback" />

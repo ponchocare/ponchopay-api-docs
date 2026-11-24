@@ -1,0 +1,261 @@
+/*
+ * PonchoPay theme for Starlight, from the PonchoPay Marketing Design System:
+ * cream canvas, navy ink, mint/teal as the single action colour, Gellix type, and the
+ * "chunky" 2px ink outline with a hard, zero-blur offset shadow.
+ *
+ * Contrast notes (WCAG): teal (#00CCA7) is only 1.9:1 on cream, so it is never used for text
+ * in light mode. Links are navy with a teal underline. Secondary text uses #5B6470 (5.5:1 on cream).
+ */
+
+:root {
+  /* Brand palette (design system tokens) */
+  --pp-mint: #00cca7;
+  --pp-yellow: #fac810;
+  --pp-navy: #1a2535;
+  --pp-coral: #ff5f5d;
+  --pp-blue: #126dff;
+  --pp-cream: #f7f6ee;
+  --pp-white: #ffffff;
+
+  --pp-ink: var(--pp-navy);
+  --pp-radius-button: 16px;
+  --pp-radius-card: 24px;
+  --pp-radius-pill: 100px;
+  --pp-shadow-button: inset 0 0 0 2px var(--pp-ink), -4px 4px 0 0 var(--pp-ink);
+  --pp-shadow-card: inset 0 0 0 2px var(--pp-ink), 8px 8px 0 0 var(--pp-ink);
+
+  --sl-font: 'Gellix', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --sl-content-width: 48rem;
+  /* Narrower navigation (Starlight's default is 18.75rem) leaves more room for content and code.
+     17rem is the narrowest that keeps every endpoint's method badge on one line. */
+  --sl-sidebar-width: 17rem;
+}
+
+/* Dark mode: navy canvas, white type, teal accents (teal on navy is 7.5:1). */
+:root {
+  --sl-color-accent-low: #0e3d3a;
+  --sl-color-accent: #00cca7;
+  --sl-color-accent-high: #66e0ca;
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #eef0f3;
+  --sl-color-gray-2: #c8ced6;
+  --sl-color-gray-3: #9aa4b1;
+  --sl-color-gray-4: #6b7685;
+  --sl-color-gray-5: #3a4657;
+  --sl-color-gray-6: #232f40;
+  --sl-color-black: #1a2535;
+
+  --pp-surface-card: #232f40;
+  --pp-ink: #000000;
+  --pp-outline: #66e0ca;
+}
+
+/* Light mode: cream canvas, navy ink. */
+:root[data-theme='light'] {
+  --sl-color-accent-low: #ccf5ee;
+  --sl-color-accent: #00cca7;
+  --sl-color-accent-high: #1a2535;
+  --sl-color-white: #1a2535;
+  --sl-color-gray-1: #232f40;
+  --sl-color-gray-2: #2e3a4b;
+  --sl-color-gray-3: #4a5566;
+  --sl-color-gray-4: #5b6470;
+  --sl-color-gray-5: #c9ccc4;
+  --sl-color-gray-6: #edece2;
+  --sl-color-gray-7: #f2f1e8;
+  --sl-color-black: #f7f6ee;
+  /* Starlight uses the accent for link and "current item" text in light mode; teal fails
+     contrast on cream, so use navy (the teal shows as underlines and fills instead). */
+  --sl-color-text-accent: #1a2535;
+
+  --pp-surface-card: #ffffff;
+  --pp-ink: #1a2535;
+  --pp-outline: #1a2535;
+}
+
+/* ---------- Typography ---------- */
+
+h1,
+h2,
+h3,
+h4,
+.sl-markdown-content :is(h1, h2, h3, h4) {
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.sl-markdown-content a:not(.not-content *, .pp-button) {
+  color: var(--sl-color-white);
+  text-decoration-color: var(--sl-color-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.sl-markdown-content a:not(.not-content *, .pp-button):hover {
+  text-decoration-color: currentColor;
+}
+
+/* ---------- Header and sidebar ---------- */
+
+header.header {
+  border-bottom: 2px solid var(--pp-outline);
+}
+
+.site-title {
+  text-decoration: none;
+}
+.site-title img {
+  height: 1.75rem;
+  width: auto;
+}
+
+/* Current page in the sidebar: teal pill with navy text (7.5:1). */
+:root[data-theme='light'] .sidebar-content a[aria-current='page'] {
+  background-color: var(--sl-color-accent);
+  color: var(--pp-navy);
+}
+.sidebar-content a[aria-current='page'] {
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* ---------- Cards, asides, buttons: the chunky outline + hard shadow ---------- */
+
+.card,
+.sl-link-card {
+  background-color: var(--pp-surface-card);
+  border: none !important;
+  border-radius: var(--pp-radius-card) !important;
+  box-shadow: inset 0 0 0 2px var(--pp-outline), 8px 8px 0 0 var(--pp-ink);
+}
+.sl-link-card:hover {
+  box-shadow: inset 0 0 0 2px var(--pp-outline), 4px 4px 0 0 var(--pp-ink);
+  transform: translate(4px, 4px);
+}
+
+.starlight-aside {
+  border-radius: var(--pp-radius-button);
+  border: 2px solid var(--pp-outline);
+  border-inline-start-width: 2px;
+}
+
+/* Hero and in-page buttons follow the design system Button (teal fill, navy text, -4,4 shadow). */
+.sl-link-button.primary,
+.pp-button {
+  background-color: var(--pp-mint);
+  color: var(--pp-navy) !important;
+  border: none;
+  border-radius: var(--pp-radius-button);
+  box-shadow: inset 0 0 0 2px var(--pp-navy), -4px 4px 0 0 var(--pp-navy);
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+}
+.sl-link-button.primary:hover,
+.pp-button:hover {
+  transform: translate(-4px, 4px);
+  box-shadow: inset 0 0 0 2px var(--pp-navy), 0 0 0 0 var(--pp-navy);
+}
+.sl-link-button.secondary {
+  border-radius: var(--pp-radius-button);
+  border: 2px solid var(--pp-outline);
+}
+
+/* ---------- HTTP method pills (and the matching sidebar badges) ---------- */
+
+.sidebar-content .sl-badge {
+  border: none;
+  border-radius: var(--pp-radius-pill);
+  box-shadow: inset 0 0 0 1.5px var(--pp-navy);
+  color: var(--pp-navy);
+  font-weight: 700;
+}
+.sidebar-content .sl-badge.success {
+  background-color: var(--pp-mint);
+}
+.sidebar-content .sl-badge.note {
+  background-color: #a8cbff;
+}
+.sidebar-content .sl-badge.caution {
+  background-color: var(--pp-yellow);
+}
+.sidebar-content .sl-badge.danger {
+  background-color: var(--pp-coral);
+}
+
+.pp-method {
+  display: inline-block;
+  padding: 0.125rem 0.625rem;
+  border-radius: var(--pp-radius-pill);
+  box-shadow: inset 0 0 0 2px var(--pp-navy);
+  color: var(--pp-navy);
+  font-size: var(--sl-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+.pp-method--post {
+  background-color: var(--pp-mint);
+}
+.pp-method--get {
+  background-color: #a8cbff;
+}
+.pp-method--put,
+.pp-method--patch {
+  background-color: var(--pp-yellow);
+}
+.pp-method--delete {
+  background-color: var(--pp-coral);
+}
+
+/* ---------- Code ---------- */
+
+.expressive-code .frame {
+  --ec-brdRad: 12px;
+}
+
+/* ---------- Tables (field reference) ---------- */
+
+.sl-markdown-content table {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 2px solid var(--pp-outline);
+  border-radius: var(--pp-radius-button);
+  overflow: hidden;
+  font-size: var(--sl-text-sm);
+}
+.sl-markdown-content :is(th, td) {
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  vertical-align: top;
+}
+/* Field reference tables: give the description column the room. */
+.sl-markdown-content :is(th, td):last-child:not(:first-child) {
+  width: 55%;
+}
+.sl-markdown-content tr:last-child td {
+  border-bottom: none;
+}
+.sl-markdown-content th {
+  background-color: var(--sl-color-gray-6);
+  font-weight: 600;
+}
+.sl-markdown-content td:first-child code {
+  white-space: nowrap;
+}
+/* On narrow screens, wide tables scroll sideways instead of widening the page. */
+@media (max-width: 50rem) {
+  .sl-markdown-content table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-link-card:hover,
+  .sl-link-button.primary:hover,
+  .pp-button:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,133 @@
+---
+title: Update a payment method
+description: Change the amount or type of one payment method within a payment.
+tableOfContents: false
+sidebar:
+  label: Update payment method
+  order: 4
+  badge:
+    text: PUT
+    variant: caution
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import Endpoint from '../../../components/Endpoint.astro';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+<ApiColumns>
+  Changes one payment method within a payment: its amount, its type, or both. Use it to correct
+  how a payment was split, for example when a parent paid part of an invoice with vouchers instead
+  of Tax-Free Childcare.
+
+  PonchoPay sends [`payment_updated`](/webhooks/events/payment-updated/) after the change.
+
+  <Fragment slot="code">
+    <Endpoint method="PUT" path="/api/payment-method/{paymentMethodId}" />
+  </Fragment>
+</ApiColumns>
+
+## Authentication
+
+<ApiColumns>
+  Send a [management JWT](/getting-started/authentication/#management-jwt) in the `Authorization`
+  header, with `sig` computed from the exact JSON body you send. The SDKs build the token for you,
+  and take `urn` and `email` alongside the body fields.
+
+  <Fragment slot="code">
+    ```http
+    PUT /api/payment-method/{paymentMethodId}
+    Authorization: Bearer <jwt>
+    Content-Type: application/json
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Parameters
+
+<ApiColumns>
+  <Fields schema="PaymentMethodPath" />
+
+  The body must be JSON:
+
+  <Fields schema="UpdatePaymentMethod" />
+
+  <Aside type="caution" title="Different type names">
+    This endpoint uses `card`, `childcare-voucher` and `tax-free-childcare`. Webhooks report the
+    same types as `credit_debit_card`, `childcare_vouchers` and `tax_free_childcare`.
+  </Aside>
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { Client, PaymentMethodType } from '@ponchopay/pp-nodejs';
+
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+
+        await client.updatePaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', {
+          urn: 'INTTEST',
+          email: 'admin@club.example.com',
+          type: PaymentMethodType.ChildcareVouchers, // 'childcare-voucher'
+          amount: 3000,
+          voucher_provider: 'cooperating_helping_4ever',
+        });
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use PonchoPay\Client;
+
+        $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+
+        $client->updatePaymentMethod('a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20', [
+            'urn' => 'INTTEST',
+            'email' => 'admin@club.example.com',
+            'type' => 'childcare-voucher',
+            'amount' => 3000,
+            'voucher_provider' => 'cooperating_helping_4ever',
+        ]);
+        ```
+      </TabItem>
+      <TabItem label="cURL">
+        ```bash
+        # $JWT: a management JWT whose sig is computed from exactly this body
+        curl -X PUT https://demo.ponchopay.com/api/payment-method/a1c3e5f7-2b4d-4f6a-8c0e-1d3f5a7c9e20 \
+          -H "Authorization: Bearer $JWT" \
+          -H 'Content-Type: application/json' \
+          -d '{"type":"childcare-voucher","amount":3000,"voucher_provider":"cooperating_helping_4ever"}'
+        ```
+      </TabItem>
+    </Tabs>
+
+    <Example schema="UpdatePaymentMethod" title="Body" />
+  </Fragment>
+</ApiColumns>
+
+## Returns
+
+<ApiColumns>
+  **`204 No Content`**: the payment method was updated.
+
+  **`400 Bad Request`**: nothing changed. Common messages:
+
+  | Message | What to check |
+  | --- | --- |
+  | `Invalid amount` | `amount` isn't valid for this payment. |
+  | `Invalid scheme` | `type` isn't one of `card`, `childcare-voucher` or `tax-free-childcare`. |
+  | `Invalid scheme change` | The payment method can't be changed to that type. |
+  | `Voucher provider missing` | `type` is `childcare-voucher` but there's no `voucher_provider`. |
+  | `Invalid data` | The payment method isn't a voucher payment, so it can't take voucher details. |
+  | `Invalid update` | The payment method is already in bank and can't be changed. |
+
+  An invalid or expired token is rejected before any of these checks.
+
+  <Fragment slot="code">
+    ```http title="Response"
+    HTTP/1.1 204 No Content
+    ```
+  </Fragment>
+</ApiColumns>
