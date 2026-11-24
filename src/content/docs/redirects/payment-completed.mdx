@@ -12,7 +12,7 @@ import Fields from '../../../components/Fields.astro';
 import Example from '../../../components/Example.astro';
 
 <ApiColumns>
-  Sent when the payment is fully complete: the parent has taken all the necessary actions to make
+  Sent when the payment is complete on the parent's side: they've taken all the necessary actions to make
   sure the payment will be correctly taken from the payment method they chose.
 
   That's when the parent finishes their part of checkout. For Standard Tax-Free Childcare and
@@ -40,7 +40,7 @@ import Example from '../../../components/Example.astro';
 ## Form fields
 
 <ApiColumns>
-  The body is a **PaymentCompleted** object, sent by PonchoPay when a payment successfully completes. It's form-encoded
+  The body is a **PaymentCompleted** object, sent by PonchoPay when the parent completes a payment. It's form-encoded
   (`application/x-www-form-urlencoded`) with these fields:
 
   <Fields schema="RedirectBody" />

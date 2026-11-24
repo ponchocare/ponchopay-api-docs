@@ -172,14 +172,14 @@ export const schemas = {
       {
         name: 'id',
         type: 'string',
-        example: '0f8b6a52-3c1e-4c55-9d6b-7a1f2e9c4d10',
+        example: '2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d62',
         description:
           'Unique ID for this event. If the event is manually resent from PonchoPay, it keeps the same ID, so use it to skip events you\'ve already handled.',
       },
       {
         name: 'date',
         type: 'string',
-        example: '2026-11-24T10:15:30.000Z',
+        example: '2026-11-24T10:15:31.000Z',
         description:
           'When the event was first sent, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. A manually resent event keeps the original date.',
       },
@@ -389,14 +389,14 @@ export const schemas = {
       {
         name: 'id',
         type: 'string',
-        example: '7c2e9a14-5b3d-4e8f-a1c6-9d0b2f4e6a81',
+        example: '9c0d1e2f-3a4b-4c5d-6e7f-8a9b0c1d2e39',
         description:
           "Unique ID for this event. If the event is manually resent from PonchoPay, it keeps the same ID, so use it to skip events you've already handled.",
       },
       {
         name: 'date',
         type: 'string',
-        example: '2026-11-24T10:15:30.000Z',
+        example: '2026-11-24T10:16:02.000Z',
         description:
           'When the event was first sent, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. A manually resent event keeps the original date.',
       },
@@ -517,7 +517,7 @@ export const schemas = {
       {
         name: 'tax_free_childcare_payments_enabled',
         type: 'boolean',
-        example: false,
+        example: true,
         description: 'Whether the location can take Tax-Free Childcare.',
       },
     ],

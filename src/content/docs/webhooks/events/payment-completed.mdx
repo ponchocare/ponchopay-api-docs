@@ -1,6 +1,6 @@
 ---
 title: Payment completed
-description: "The payment_completed webhook. Sent when the parent has done everything needed for the payment to be taken from the payment method they chose."
+description: "The payment_completed webhook. Sent when the parent has done everything needed for the payment to be taken from the payment method they chose (for Standard Tax-Free Childcare and vouchers, once PonchoPay confirms the money is in the provider's bank)."
 tableOfContents: false
 sidebar:
   order: 3
@@ -16,7 +16,8 @@ import Example from '../../../../components/Example.astro';
 import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
 <ApiColumns>
-  Sent when the parent has done everything needed for the payment to be taken. This is usually the
+  Sent when the parent has done everything needed for the payment to be taken (for Standard Tax-Free
+  Childcare and vouchers, once PonchoPay confirms the money is in the provider's bank). This is usually the
   event to act on: mark the order as paid, confirm the booking, or send your own receipt.
 
   - **Card, Pay by Bank or Express Tax-Free Childcare payments**: as soon as checkout finishes and
@@ -35,6 +36,10 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
     `payment_completed` only follows once the
     money is confirmed.
   </Aside>
+
+  Integrations on the [legacy lifecycle](/webhooks/overview/#payment-lifecycle) (set up before 25 April
+  2025) get no `payment_reported_complete`: their `payment_completed` is sent when the parent reports
+  the payment.
 
   <Fragment slot="code">
     <Event name="payment_completed" setting="Payment completed" />

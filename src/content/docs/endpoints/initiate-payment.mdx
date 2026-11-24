@@ -105,7 +105,7 @@ import Example from '../../../components/Example.astro';
         // Computes the token and returns the checkout URL.
         const checkoutUrl = await client.initiatePayment({
           urn: 'INTTEST',
-          amount: 1256, // £12.56
+          amount: 4274, // £42.74
           metadata: 'order-67651',
           email: 'parent@example.com',
         });
@@ -125,7 +125,7 @@ import Example from '../../../components/Example.astro';
         // Computes the token and returns the checkout URL.
         $checkoutUrl = $client->initiatePayment([
             'urn' => 'INTTEST',
-            'amount' => 1256, // £12.56
+            'amount' => 4274, // £42.74
             'metadata' => 'order-67651',
             'email' => 'parent@example.com',
         ]);
@@ -141,7 +141,7 @@ import Example from '../../../components/Example.astro';
         <pp-payment
           token="TOKEN_FROM_YOUR_SERVER"
           urn="INTTEST"
-          amount="1256"
+          amount="4274"
           metadata="order-67651"
           email="parent@example.com"
         >Pay with PonchoPay</pp-payment>
@@ -153,7 +153,7 @@ import Example from '../../../components/Example.astro';
         <form method="post" action="https://pay.ponchopay.com/api/integration/generic/initiate">
           <input type="hidden" name="token" value="TOKEN_FROM_YOUR_SERVER" />
           <input type="hidden" name="urn" value="INTTEST" />
-          <input type="hidden" name="amount" value="1256" />
+          <input type="hidden" name="amount" value="4274" />
           <input type="hidden" name="metadata" value="order-67651" />
           <input type="hidden" name="email" value="parent@example.com" />
           <button type="submit">Pay with PonchoPay</button>
@@ -166,7 +166,7 @@ import Example from '../../../components/Example.astro';
           -H 'Content-Type: application/json' \
           -d '{
             "urn": "INTTEST",
-            "amount": 1256,
+            "amount": 4274,
             "metadata": "order-67651",
             "email": "parent@example.com",
             "token": "'"$TOKEN"'"

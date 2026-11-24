@@ -26,6 +26,10 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
   Use it to show the payment as pending. Don't treat it as paid yet.
 
+  Integrations on the [legacy lifecycle](/webhooks/overview/#payment-lifecycle) (set up before 25 April
+  2025) get no `payment_reported_complete`: their `payment_completed` is sent when the parent reports
+  the payment.
+
   <Fragment slot="code">
     <Event name="payment_reported_complete" setting="Payment reported complete" />
   </Fragment>
@@ -54,7 +58,8 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
 <ApiColumns>
   On the demo environment, [initiate a payment](/endpoints/initiate-payment/), choose Standard
-  Tax-Free Childcare or vouchers in checkout, leave a test card, and report the payment as complete.
+  Tax-Free Childcare or vouchers in checkout (leave a test card if payment guarantee is turned on),
+  and report the payment as complete.
   Any reference in the [standard reference format](/getting-started/testing/#tax-free-childcare)
   works.
 
