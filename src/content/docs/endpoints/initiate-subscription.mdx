@@ -148,6 +148,7 @@ import Example from '../../../components/Example.astro';
             "metadata": "membership-2291",
             "email": "parent@example.com",
             "repetition": { "granularity": "month", "period": 1, "day": 1 },
+            "ending": { "condition": "occurrences", "occurrences": 12 },
             "token": "'"$TOKEN"'"
           }'
         ```
@@ -181,12 +182,12 @@ import Example from '../../../components/Example.astro';
   | --- | --- |
   | `Invalid token or provider not setup` | The token was computed with the wrong key or different `metadata`, or the `urn` isn't one of your locations. |
   | `Provider location not verified` | The location hasn't finished verification. Check with [Validate location](/endpoints/validate-location/). |
-  | `Payments not enabled` | No payment methods are turned on for the provider. |
+  | `Payments not enabled` | Payment guarantee is on, but the provider's card payments account isn't set up yet. |
   | `The amount value is invalid` | `amount` isn't a valid amount in pence. |
-  | `Invalid repetition` | `repetition` is missing a field its `granularity` needs, or has an unknown `granularity`. |
-  | `Invalid ending` | `ending` is missing a field its `condition` needs, or has an unknown `condition`. |
+  | `Invalid ending` | `ending.date` is before any payment would be taken. |
   | `Consider an open-ending subscription` | `ending.date` is too far ahead. Use `"condition": "never"` instead. |
-  | `Invalid body` | A parameter is missing or the wrong type. |
+  | `Invalid body` | `additional_one_time_payment` has no `metadata`. |
+  | A validation message naming the parameter | A parameter is missing or the wrong type, including a field that `repetition` or `ending` needs. |
 
   <Fragment slot="code">
     ```http title="Response"

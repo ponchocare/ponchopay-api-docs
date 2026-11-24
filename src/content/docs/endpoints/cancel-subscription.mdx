@@ -95,10 +95,9 @@ import Fields from '../../../components/Fields.astro';
 <ApiColumns>
   **`204 No Content`**: the recurring payment was cancelled.
 
-  **`400 Bad Request`**: the recurring payment couldn't be cancelled.
+  **`400 Bad Request`** with `Recurring payment cannot be cancelled`: it's already cancelled.
 
-  Requests with an invalid or expired token, or for a recurring payment that doesn't belong to the
-  token's location, are rejected.
+  Requests with an invalid or expired token are rejected.
 
   <Fragment slot="code">
     ```http title="Response"

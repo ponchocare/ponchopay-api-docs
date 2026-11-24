@@ -99,8 +99,9 @@ import Fields from '../../../components/Fields.astro';
 
   **`400 Bad Request`**: the payment couldn't be cancelled.
 
-  Requests with an invalid or expired token, or for a payment that doesn't belong to the token's
-  location, are rejected.
+  A payment that's already completed or in bank can't be cancelled, and the request fails.
+  Requests with an invalid or expired token, or for a payment that isn't at one of the provider's
+  locations, are rejected.
 
   <Fragment slot="code">
     ```http title="Response"

@@ -26,9 +26,10 @@ import Example from '../../../components/Example.astro';
   PonchoPay sends [`payment_refunded`](/webhooks/events/payment-refunded/) when the payment is refunded.
 
   <Aside type="caution" title="Card payments only">
-    Only card payment methods (including Apple Pay, Google Pay, Klarna and Pay by Bank) can be
-    refunded here. Tax-Free Childcare refunds must go back to the parent's Tax-Free Childcare
-    account, and voucher refunds go through the voucher provider.
+    Card payment methods (including Apple Pay, Google Pay, Klarna and Pay by Bank) can be refunded
+    here, and so can Tax-Free Childcare or voucher payment methods that were charged to the parent's
+    card through the payment guarantee. Otherwise, Tax-Free Childcare refunds must go back to the
+    parent's Tax-Free Childcare account, and voucher refunds go through the voucher provider.
   </Aside>
 
   <Fragment slot="code">
@@ -121,7 +122,7 @@ import Example from '../../../components/Example.astro';
   | `400` | `Requested refund amount exceeds the refundable amount.` | `amount` is more than what's left to refund. |
   | `400` | `A card payment was expected but it could not be found.` | The payment method has no card payment to refund. |
   | `400` | `Original card payment reference could not be located.` | The original card payment can't be found to refund against. |
-  | `400` | `Unable to refund payment method.` | The payment method isn't a card payment method. |
+  | `400` | `Unable to refund payment method.` | The payment method isn't a card payment method and hasn't been charged to the parent's card. |
   | `409` | `A refund is already in progress. Please wait for it to complete.` | Wait for the earlier refund's webhook, then try again. |
 
   An invalid or expired token is rejected before any of these checks.

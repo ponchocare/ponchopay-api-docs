@@ -216,7 +216,7 @@ export const schemas = {
         example: ['$.payment.amount'],
         optional: true,
         description:
-          'Only on `payment_updated`. JSON paths of the fields that changed, such as `$.payment.amount` or `$.payment.payment_methods[0]`.',
+          'Only on `payment_updated`. JSON paths of what changed: `$.payment.amount` if the amount changed, and `$.payment.payment_methods[n]` for the payment method that changed. Fields that change as a result, such as `payment.method`, aren\'t listed, so refresh your copy from `payment`.',
       },
     ],
   },
@@ -236,7 +236,7 @@ export const schemas = {
       {
         name: 'reference',
         type: 'string',
-        example: 'PP4X7K2Q',
+        example: 'PP-4X7k2Q',
         description: 'Short reference that makes the payment easy to identify.',
       },
       {
@@ -450,7 +450,7 @@ export const schemas = {
       {
         name: 'reference',
         type: 'string',
-        example: 'PR9M3T5W',
+        example: 'PR-9M3t5W',
         description: 'Short reference that makes the recurring payment easy to identify.',
       },
       {
@@ -731,7 +731,7 @@ export const schemas = {
           'The payment method type. These names differ from the ones in webhooks (`credit_debit_card`, `childcare_vouchers`, `tax_free_childcare`). The type can only change between `tax-free-childcare` and `childcare-voucher`; changing it gives the payment method a new ID.',
         enum: [
           { value: 'card', description: 'Card, including Apple Pay, Google Pay, Klarna and Pay by Bank.' },
-          { value: 'childcare-voucher', description: 'Childcare vouchers. Send `voucher_provider` too.' },
+          { value: 'childcare-voucher', description: 'Childcare vouchers. When changing to this type, send `voucher_provider` too.' },
           { value: 'tax-free-childcare', description: 'Tax-Free Childcare.' },
         ],
       },
@@ -745,7 +745,7 @@ export const schemas = {
       {
         name: 'voucher_provider',
         type: 'string',
-        requiredIf: 'type is childcare-voucher',
+        requiredIf: 'type changes to childcare-voucher',
         inDefaultExample: true,
         example: 'cooperating_helping_4ever',
         description:

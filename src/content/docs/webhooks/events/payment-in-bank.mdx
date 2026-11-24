@@ -1,6 +1,6 @@
 ---
 title: Payment in bank
-description: "The payment_in_bank webhook. Sent when PonchoPay finds the payment in the provider's bank account."
+description: "The payment_in_bank webhook. Sent when PonchoPay finds the payment in the provider's bank account. Not available for every payment."
 tableOfContents: false
 sidebar:
   order: 4
@@ -39,7 +39,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   <Fields schema="PaymentCallback" />
 
   <Fragment slot="code">
-    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_in_bank', id: '3c4d5e6f-7a8b-4c9d-0e1f-2a3b4c5d6e73', date: '2026-11-27T09:02:11.000Z', 'payment.method': 'tax_free_childcare', 'payment.payment_methods.0.type': 'tax_free_childcare', 'payment.payment_methods.0.variant': 'instant', 'payment.id': '3b5d7f9a-1c3e-4a5b-8d7f-0a2c4e6b8d93', 'payment.reference': 'PP5H8W3D', 'payment.payment_methods.0.id': '7f9b1d3e-5a7c-4e9b-8c1d-3f5a7c9e1b26', 'request.metadata': 'order-67653' }} />
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_in_bank', id: '3c4d5e6f-7a8b-4c9d-0e1f-2a3b4c5d6e73', date: '2026-11-27T09:02:11.000Z', 'payment.method': 'tax_free_childcare', 'payment.payment_methods.0.type': 'tax_free_childcare', 'payment.payment_methods.0.variant': 'instant', 'payment.id': '3b5d7f9a-1c3e-4a5b-8d7f-0a2c4e6b8d93', 'payment.reference': 'PP-5H8w3D', 'payment.payment_methods.0.id': '7f9b1d3e-5a7c-4e9b-8c1d-3f5a7c9e1b26', 'request.metadata': 'order-67653' }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     payment.
   </Fragment>

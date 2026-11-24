@@ -202,7 +202,8 @@ import Example from '../../../components/Example.astro';
   | `Invalid token or provider not setup` | The token was computed with the wrong key or different `metadata`, or the `urn` isn't one of your locations. |
   | `Minimum card amount can not be more than total amount` | `constraints.minimum_card_amount` is larger than `amount`. |
   | `Card payment method must be allowed when specifying a minimum card amount` | You set a minimum card amount but card payments aren't turned on for the provider. |
-  | `Invalid body` | A parameter is missing or the wrong type, or the line items don't add up to `amount`. |
+  | `Invalid body` | `metadata` is missing, or the line items don't add up to `amount`. |
+  | A validation message naming the parameter | A parameter is missing or the wrong type. |
 
   <Fragment slot="code">
     ```http title="Response"

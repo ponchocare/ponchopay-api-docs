@@ -141,8 +141,9 @@ the SDK parameters without duplicating them.
 - **Type names**: Update a payment method uses `card`, `childcare-voucher`, `tax-free-childcare`,
   while webhooks use `credit_debit_card`, `childcare_vouchers`, `tax_free_childcare`. Both pages
   now call this out.
-- **Refunds**: card payment methods only. Tax-Free Childcare and voucher refunds go through the
-  scheme.
+- **Refunds**: card payment methods, plus Tax-Free Childcare or voucher payment methods charged to
+  the parent's card through the payment guarantee (`subsidy/manager.ts` `refund()`). Other Tax-Free
+  Childcare and voucher refunds go through the scheme.
 - **Redirects aren't proof of payment**: they're unsigned browser posts. The pages say to rely on
   webhooks.
 - **Webhook handlers** use constant-time comparison and include a Python version.
@@ -170,9 +171,9 @@ Deliberate differences kept, because the code shows Notion was wrong or incomple
 
 - **Integer amounts**: Notion types amounts as `number`. The site says `integer` because they're
   pence (`@IsInt()` in the DTOs).
-- **`voucher_provider`**: Notion marks it optional. The site says "Required if type is
-  childcare-voucher", because the endpoint returns `Voucher provider missing` otherwise
-  (`src/be/subsidy/controller.ts`).
+- **`voucher_provider`**: Notion marks it optional. The site says it's required when the type
+  changes to `childcare-voucher`, the only case where the endpoint returns `Voucher provider missing`
+  (`src/be/subsidy/manager.ts`).
 - **Refund limit**: Notion's SDK pages say the remaining amount "in the payment". The site says per
   payment method, as Notion's RefundPaymentMethod object does and the endpoint enforces.
 - **`parseCallback` / `isValidCallback`**: they take a Fetch API `Request` (the SDK calls
@@ -195,6 +196,10 @@ Deliberate differences kept, because the code shows Notion was wrong or incomple
   and payment methods that have already taken a payment (`HasNonZeroPaymentError`) can't be
   updated, and a request that changes nothing is a no-op. The `Invalid data` message mapped in the
   controller is never raised (`IsNotChildcareVoucherError` is never thrown), so it isn't listed.
+- **Error tables follow the code**: `Invalid body` only comes from the DTOs' `isValid()` checks;
+  missing or wrong-type fields get a validation message naming the field. `Invalid repetition`
+  can't be reached, `Invalid ending` means `ending.date` leaves no payments, and `Payments not
+  enabled` means payment guarantee is on without a card payments account.
 - **Endpoint headers** show paths relative to the documented base URL (`…/api/`); the full URLs
   underneath are unchanged.
 
