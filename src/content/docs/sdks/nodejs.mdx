@@ -62,7 +62,7 @@ import Fields from '../../../components/Fields.astro';
   there. It calls [Initiate a payment](/endpoints/initiate-payment/) and computes the `token` for
   you, so pass every parameter except `token`. `expiry` can be a `Date` or an ISO 8601 string.
 
-  The parameter types shown are the API's. In the SDK, `integer` fields (amounts, `period`, `day`, `occurrences`) are `number`s, dates (`expiry`, `ending.date`) can be a `Date` object or an ISO 8601 string, and `weekdays` is a `Set` of `Weekday` values.
+  The parameter types shown are the API's. In the SDK, `integer` fields (amounts, `quantity`, `period`, `day`, `occurrences`) are `number`s, dates (`expiry`, `ending.date`) can be a `Date` object or an ISO 8601 string, and `weekdays` is a `Set` of `Weekday` values.
 
   <Fields schema="InitiatePayment" omit={['token']} />
 
@@ -100,7 +100,7 @@ import Fields from '../../../components/Fields.astro';
   computes the `token`. Dates can be `Date` objects. For weekly repetitions, pass `weekdays` as a
   `Set` of the exported `Weekday` values.
 
-  The parameter types shown are the API's. In the SDK, `integer` fields (amounts, `period`, `day`, `occurrences`) are `number`s, dates (`expiry`, `ending.date`) can be a `Date` object or an ISO 8601 string, and `weekdays` is a `Set` of `Weekday` values.
+  The parameter types shown are the API's. In the SDK, `integer` fields (amounts, `quantity`, `period`, `day`, `occurrences`) are `number`s, dates (`expiry`, `ending.date`) can be a `Date` object or an ISO 8601 string, and `weekdays` is a `Set` of `Weekday` values.
 
   <Fields schema="InitiateSubscription" omit={['token']} />
 

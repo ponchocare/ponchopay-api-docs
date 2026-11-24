@@ -178,8 +178,14 @@ import Example from '../../../components/Example.astro';
     <Example
       schema="InitiatePayment"
       title="Body with line items and a minimum card amount"
-      include={['constraints', 'line_items']}
-      overrides={{ amount: 4000 }}
+      include={['constraints']}
+      overrides={{
+        amount: 4274,
+        line_items: [
+          { description: 'Holiday club day', amount: 2000, quantity: 2 },
+          { description: 'Packed lunch', amount: 274, quantity: 1 },
+        ],
+      }}
     />
   </Fragment>
 </ApiColumns>

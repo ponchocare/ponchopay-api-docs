@@ -1,6 +1,6 @@
 ---
 title: Payment completed
-description: "The payment_completed webhook. Sent when a payment is done and the money will reach the provider."
+description: "The payment_completed webhook. Sent when the parent has done everything needed for the payment to be taken from the payment method they chose."
 tableOfContents: false
 sidebar:
   order: 3
@@ -68,7 +68,8 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
      checkout finishes.
   2. For Standard Tax-Free Childcare or vouchers, report the payment as complete in checkout, then
      use **Mark in bank** on the
-     [demo payments page](https://demo.ponchopay.com/provider/admin/payments).
+     [demo payments page](https://demo.ponchopay.com/provider/admin/payments) (available when
+     reconciliation is turned on).
 
   See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
 

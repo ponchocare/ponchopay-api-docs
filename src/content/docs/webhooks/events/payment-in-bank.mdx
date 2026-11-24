@@ -19,8 +19,9 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   Sent when PonchoPay finds the payment in the provider's bank account, as part of reconciliation.
   The money has been collected and is available to the provider.
 
-  Until this point, a payment the parent reported as made outside PonchoPay might not actually have
-  been made. Payments made with an express checkout method are guaranteed by now.
+  Until PonchoPay confirms it (with `payment_completed`, or with this event in the legacy
+  lifecycle), a payment the parent reported as made outside PonchoPay might not actually have been
+  made. Payments made with an express checkout method are guaranteed by now.
 
   Not every payment gets this event. Use it to mark the payment as reconciled or settled.
 
@@ -38,7 +39,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   <Fields schema="PaymentCallback" />
 
   <Fragment slot="code">
-    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_in_bank' }} />
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_in_bank', 'payment.method': 'tax_free_childcare', 'payment.payment_methods.0.type': 'tax_free_childcare', 'payment.payment_methods.0.variant': 'instant', 'payment.id': '3b5d7f9a-1c3e-4a5b-8d7f-0a2c4e6b8d93', 'payment.reference': 'PP5H8W3D', 'payment.payment_methods.0.id': '7f9b1d3e-5a7c-4e9b-8c1d-3f5a7c9e1b26', 'request.metadata': 'order-67653' }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     payment.
   </Fragment>
@@ -51,8 +52,8 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 ## Test it
 
 <ApiColumns>
-  On the demo environment, complete a payment (or report a Standard Tax-Free Childcare or voucher
-  payment as complete), then use **Mark in bank** at the end of its row on the
+  On the demo environment, complete an Express Tax-Free Childcare payment (or report a Standard
+  Tax-Free Childcare or voucher payment as complete), then use **Mark in bank** at the end of its row on the
   [payments page](https://demo.ponchopay.com/provider/admin/payments). It's available for completed,
   reported-complete and late payments when reconciliation is turned on. Card payment methods can't
   be marked in bank. In

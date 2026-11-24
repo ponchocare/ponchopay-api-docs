@@ -39,7 +39,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   <Fields schema="PaymentCallback" />
 
   <Fragment slot="code">
-    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_updated', updates: ['$.payment.payment_methods[0]'], 'payment.method': 'childcare_vouchers', 'payment.payment_methods.0.type': 'childcare_vouchers', 'payment.payment_methods.0.variant': 'cooperating_helping_4ever', 'payment.payment_methods.0.id': 'd8f0b2c4-6e1a-4c3b-9d5f-7a2c4e6b8d20' }} />
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_updated', updates: ['$.payment.payment_methods[0]'], 'payment.method': 'childcare_vouchers', 'payment.payment_methods.0.type': 'childcare_vouchers', 'payment.payment_methods.0.variant': 'cooperating_helping_4ever', 'payment.payment_methods.0.id': 'd8f0b2c4-6e1a-4c3b-9d5f-7a2c4e6b8d20', 'payment.id': 'f1a3c5e7-9b2d-4f6a-8c0e-2d4f6a8c0e31', 'payment.reference': 'PP7M2R9T', 'request.metadata': 'order-67652' }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     payment.
   </Fragment>
