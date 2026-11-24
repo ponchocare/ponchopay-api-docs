@@ -1,5 +1,5 @@
 ---
-title: Recurring payment cancelled
+title: Recurring payment cancel
 description: "The recurring_payment_cancel webhook. Sent when a recurring payment is cancelled and will take no more payments."
 tableOfContents: false
 sidebar:
@@ -16,9 +16,9 @@ import Example from '../../../../components/Example.astro';
 import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
 <ApiColumns>
-  Sent when a recurring payment is cancelled, through
-  [Cancel a subscription](/endpoints/cancel-subscription/) or the admin. It takes no more payments.
-  Payments already taken aren't affected.
+  Sent when a recurring payment has been cancelled in the admin, or through
+  [Cancel a subscription](/endpoints/cancel-subscription/). Once cancelled, it no longer generates
+  payments. Payments already taken aren't affected.
 
   Note the event name: `recurring_payment_cancel`, not `recurring_payment_cancelled`.
 
@@ -36,7 +36,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   <Fields schema="SubscriptionCallback" />
 
   <Fragment slot="code">
-    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_cancel' }} />
+    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_cancel', 'request.metadata': 'membership-2291', 'subscription.payment_methods.0.amount': 8500 }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     recurring payment.
   </Fragment>

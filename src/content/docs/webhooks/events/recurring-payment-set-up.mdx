@@ -36,7 +36,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   <Fields schema="SubscriptionCallback" />
 
   <Fragment slot="code">
-    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_set_up' }} />
+    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_set_up', 'request.metadata': 'membership-2291', 'subscription.payment_methods.0.amount': 8500 }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     recurring payment.
   </Fragment>

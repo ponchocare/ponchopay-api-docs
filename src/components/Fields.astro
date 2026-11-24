@@ -46,6 +46,11 @@ const fields = await Promise.all(
 );
 ---
 
+{
+  depth === 0 && schema.kind === 'response' && (
+    <p class="pp-fields__legend">Fields not marked Optional are always sent.</p>
+  )
+}
 <ul class:list={['pp-fields', 'not-content', { 'pp-fields--nested': depth > 0 }]}>
   {
     fields.map((field) => (
@@ -94,6 +99,14 @@ const fields = await Promise.all(
 </ul>
 
 <style is:global>
+  .pp-fields__legend {
+    margin: 1rem 0 0;
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+  .pp-fields__legend + .pp-fields {
+    margin-top: 0.5rem;
+  }
   .pp-fields {
     list-style: none;
     margin: 1rem 0 0;

@@ -3,8 +3,9 @@
 Moving the PonchoPay API documentation from Notion to a Starlight (Astro) site on GitHub Pages,
 then adding SDK walkthroughs and tooling that lets AI agents integrate PonchoPay.
 
-**Status:** Phases 1 to 4 done: every Notion page is ported, plus SDK walkthroughs for Node.js, PHP
-and the browser (38 pages). Next: Phase 5, agent and LLM tooling. Nothing is committed yet.
+**Status:** Phases 1 to 4 done and reviewed for parity with the Notion export: every Notion page
+is ported, plus SDK walkthroughs (38 pages). On PR ponchocare/ponchopay-api-docs#1. Next: Phase 5,
+agent and LLM tooling.
 
 ## Decisions
 
@@ -145,6 +146,42 @@ the SDK parameters without duplicating them.
 - **Redirects aren't proof of payment**: they're unsigned browser posts. The pages say to rely on
   webhooks.
 - **Webhook handlers** use constant-time comparison and include a Python version.
+
+## Parity review against the Notion export (24 Nov 2026)
+
+Four parallel reviews compared every Notion page (main page, 7 endpoints, 10 callbacks, 2
+redirects, 17 objects, 3 SDKs and their function pages) with the built site, field by field. About
+60 differences were found. All were fixed to match Notion, except the deliberate ones below.
+
+Restored from Notion, among others: the payment methods settings screenshot and checkbox names,
+admin settings links, `paymentId` for Google Pay, the webhook implementation warning, the
+"potentially unsafe" parsing note, the full jwt.io walkthrough with the example token, hashed key
+and screenshot, "No response is expected", "manually retriggered" for resent events, the "Always
+exists" meaning (a legend under every response field list), the voucher provider name rules in
+full, expiry and constraints caveats on the additional payment, payment method scopes
+(`payment_captured` for card and Express TFC, recurring captured for TFC and voucher recurring
+payments, guarantee caveat for the whole event), Notion's wording for `amount`, `reference`,
+`variant` and `ponchopay`, both callback objects' headers tables, the production base URL with
+`/api/`, the test-callback instructions, the Express TFC result column, typed Node.js declarations,
+and the SDK development commands. Inferences that weren't in Notion were removed (Klarna and Pay
+by Bank in the captured scope, "one event per refund", "PonchoPay records your response").
+
+Deliberate differences kept, because the code shows Notion was wrong or incomplete:
+
+- **Integer amounts**: Notion types amounts as `number`. The site says `integer` because they're
+  pence (`@IsInt()` in the DTOs).
+- **`voucher_provider`**: Notion marks it optional. The site says "Required if type is
+  childcare-voucher", because the endpoint returns `Voucher provider missing` otherwise
+  (`src/be/subsidy/controller.ts`).
+- **Refund limit**: Notion's SDK pages say the remaining amount "in the payment". The site says per
+  payment method, as Notion's RefundPaymentMethod object does and the endpoint enforces.
+- **`parseCallback` / `isValidCallback`**: they take a Fetch API `Request` (the SDK calls
+  `request.clone()`, `headers.get()` and `text()`), not an Express `req`. Notion said "NodeJS
+  request".
+- **Notion copy-paste slip**: Notion's `isValidCallback` and `parseCallback` examples import
+  `createToken`. The site imports the right function.
+- **Recurring payment cancel**: also possible through the Cancel a subscription endpoint, not just
+  the admin.
 
 ## Open questions
 

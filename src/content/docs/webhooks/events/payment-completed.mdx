@@ -19,11 +19,11 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   Sent when the parent has done everything needed for the payment to be taken. This is usually the
   event to act on: mark the order as paid, confirm the booking, or send your own receipt.
 
-  - **Card, Apple Pay, Google Pay, Klarna, Pay by Bank or Express Tax-Free Childcare**: as soon as
-    checkout finishes and the funds are captured.
+  - **Card, bank or Express Tax-Free Childcare payments**: as soon as checkout finishes and the funds
+    are captured. For card and Express Tax-Free Childcare,
     [`payment_captured`](/webhooks/events/payment-captured/) is sent at the same time.
-  - **Standard Tax-Free Childcare or childcare vouchers**: once PonchoPay has confirmed the payment
-    is in the provider's bank. This can be 2 or more days after checkout, depending on the scheme's
+  - **Offline payments, such as Standard Tax-Free Childcare or childcare vouchers**: once PonchoPay
+    has confirmed the payment is in the provider's bank. This can be 2 or more days after checkout, depending on the scheme's
     payment terms.
 
   <Aside title="Parents paying outside PonchoPay">
@@ -64,9 +64,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   1. On the demo environment, [initiate a payment](/endpoints/initiate-payment/) and pay with a
      [test card](/getting-started/testing/#test-cards). `payment_completed` is sent as soon as
      checkout finishes.
-  2. For Standard Tax-Free Childcare or vouchers, report the payment as complete in checkout, then
-     use **Mark in bank** on the
-     [demo payments page](https://demo.ponchopay.com/provider/admin/payments).
+  2. For other payments, it's sent automatically once the payment has been marked as complete.
 
   See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
 

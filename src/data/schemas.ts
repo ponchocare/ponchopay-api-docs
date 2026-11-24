@@ -46,7 +46,7 @@ export interface Schema {
 const PAYMENT_METHOD_TYPES: EnumValue[] = [
   { value: 'tax_free_childcare', description: 'Paid with Tax-Free Childcare.' },
   { value: 'childcare_vouchers', description: 'Paid with childcare vouchers.' },
-  { value: 'credit_debit_card', description: 'Paid by card, Apple Pay, Google Pay, Klarna or Pay by Bank.' },
+  { value: 'credit_debit_card', description: 'Paid with a credit or debit card.' },
 ];
 
 export const schemas = {
@@ -102,7 +102,7 @@ export const schemas = {
         type: 'string',
         example: '2026-12-31T23:59:59.000Z',
         description:
-          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent must add their card details before it expires. After that, nothing more can be done with the payment.',
+          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details (you get the [`payment_captured`](/webhooks/events/payment-captured/) webhook when they do). Once a payment has expired, nothing more can be done with it.',
       },
       {
         name: 'constraints',
@@ -174,14 +174,14 @@ export const schemas = {
         type: 'string',
         example: '0f8b6a52-3c1e-4c55-9d6b-7a1f2e9c4d10',
         description:
-          'Unique ID for this event. If the event is resent, it keeps the same ID, so use it to skip events you\'ve already handled.',
+          'Unique ID for this event. If the event is manually resent from PonchoPay, it keeps the same ID, so use it to skip events you\'ve already handled.',
       },
       {
         name: 'date',
         type: 'string',
         example: '2026-11-24T10:15:30.000Z',
         description:
-          'When the event was first sent, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. A resent event keeps the original date.',
+          'When the event was first sent, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. A manually resent event keeps the original date.',
       },
       {
         name: 'event',
@@ -189,7 +189,7 @@ export const schemas = {
         example: 'payment_completed',
         description: 'Which event this is.',
         enum: [
-          { value: 'payment_captured', description: 'The parent completed checkout or left a card as a guarantee.' },
+          { value: 'payment_captured', description: 'The parent made a card payment, or completed the card pre-authorisation for a Tax-Free Childcare or voucher payment.' },
           { value: 'payment_updated', description: 'The amount or a payment method changed.' },
           { value: 'payment_reported_complete', description: "The parent says they've paid outside PonchoPay." },
           { value: 'payment_completed', description: "The payment is done and the money will reach the provider." },
@@ -237,7 +237,7 @@ export const schemas = {
         name: 'reference',
         type: 'string',
         example: 'PP4X7K2Q',
-        description: 'Short reference that makes the payment easy to find in the PonchoPay admin.',
+        description: 'Short reference that makes the payment easy to identify.',
       },
       {
         name: 'amount',
@@ -266,7 +266,7 @@ export const schemas = {
           ...PAYMENT_METHOD_TYPES,
           {
             value: 'ponchopay',
-            description: "More than one method was used (a split payment), or the method couldn't be determined.",
+            description: "The method couldn't be determined, or more than one payment method was used (for example, a split payment).",
           },
         ],
       },
@@ -282,7 +282,7 @@ export const schemas = {
   PaymentMethod: {
     title: 'PaymentMethod',
     kind: 'response',
-    description: 'One payment method used to pay a payment. A split payment has one entry per method.',
+    description: 'One payment method of a payment or recurring payment. A split payment has one entry per method.',
     fields: [
       {
         name: 'id',
@@ -309,7 +309,7 @@ export const schemas = {
         description: 'More detail about the method. The values depend on `type`.',
         enum: [
           { value: 'instant', description: '`tax_free_childcare` paid with Express checkout.' },
-          { value: 'manual', description: '`tax_free_childcare` paid with Standard checkout.' },
+          { value: 'manual', description: '`tax_free_childcare` paid any other way, for example with Standard checkout.' },
           {
             value: 'edenred, sodexo, fair_care, …',
             description: '`childcare_vouchers`: the voucher provider.',
@@ -317,7 +317,7 @@ export const schemas = {
           {
             value: 'visa, mc, amex, klarna, klarna_account, paybybank, …',
             description:
-              '`credit_debit_card`: the card brand or method. Only sent once the payment has been taken or the recurring payment set up, and may be missing for older payments.',
+              '`credit_debit_card`: the card brand or method. Only sent once the payment has been taken or the recurring payment set up, and may be missing for older payments and recurring payments.',
           },
         ],
       },
@@ -325,7 +325,7 @@ export const schemas = {
         name: 'amount',
         type: 'integer',
         example: 4274,
-        description: 'The amount paid with this method, in pence.',
+        description: 'The amount allocated to this payment method, in pence.',
       },
       {
         name: 'refunded_amount',
@@ -391,14 +391,14 @@ export const schemas = {
         type: 'string',
         example: '7c2e9a14-5b3d-4e8f-a1c6-9d0b2f4e6a81',
         description:
-          "Unique ID for this event. If the event is resent, it keeps the same ID, so use it to skip events you've already handled.",
+          "Unique ID for this event. If the event is manually resent from PonchoPay, it keeps the same ID, so use it to skip events you've already handled.",
       },
       {
         name: 'date',
         type: 'string',
         example: '2026-11-24T10:15:30.000Z',
         description:
-          'When the event was first sent, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. A resent event keeps the original date.',
+          'When the event was first sent, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. A manually resent event keeps the original date.',
       },
       {
         name: 'event',
@@ -408,7 +408,7 @@ export const schemas = {
         enum: [
           {
             value: 'recurring_payment_captured',
-            description: 'The parent left a card as a guarantee for the recurring payment.',
+            description: 'The parent completed the card pre-authorisation for a Tax-Free Childcare or voucher recurring payment.',
           },
           {
             value: 'recurring_payment_set_up',
@@ -451,13 +451,13 @@ export const schemas = {
         name: 'reference',
         type: 'string',
         example: 'PR9M3T5W',
-        description: 'Short reference that makes the recurring payment easy to find in the PonchoPay admin.',
+        description: 'Short reference that makes the recurring payment easy to identify.',
       },
       {
         name: 'amount',
         type: 'integer',
         example: 8500,
-        description: 'The amount taken each time, in pence.',
+        description: 'The recurring payment amount, in pence.',
       },
       {
         name: 'payment_methods',
@@ -589,7 +589,7 @@ export const schemas = {
         name: 'additional_one_time_payment',
         type: 'object',
         description:
-          'A one-off payment taken while the recurring payment is set up, for example a registration fee, or a one-off item in the same basket. The parent pays it first.',
+          'A one-off payment taken while the recurring payment is set up, for example a registration fee, or a one-off item in the same basket. The parent pays it first. Only the fields below are used: the payment takes the recurring payment\'s `urn` and `email`, and `token` and `line_items` aren\'t used.',
         children: 'AdditionalPayment',
       },
     ],
@@ -694,7 +694,7 @@ export const schemas = {
         required: true,
         example: 'membership-2291-registration',
         description:
-          'Your own reference for the one-off payment. It\'s returned in the webhooks for that payment. It isn\'t part of the `token`.',
+          'Your own reference for the one-off payment. It\'s returned unchanged in the webhooks for that payment. It isn\'t part of the `token`.',
       },
       {
         name: 'note',
@@ -706,12 +706,12 @@ export const schemas = {
         name: 'expiry',
         type: 'string',
         description:
-          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. At least 10 minutes after the request. Defaults to 30 days.',
+          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details. Once a payment has expired, nothing more can be done with it.',
       },
       {
         name: 'constraints',
         type: 'object',
-        description: 'Rules for how the payment can be split across payment methods.',
+        description: "Rules for how the payment can be split across payment methods. No constraints apply if it's left out.",
         children: 'PaymentConstraints',
       },
     ],
@@ -749,7 +749,7 @@ export const schemas = {
         inDefaultExample: true,
         example: 'cooperating_helping_4ever',
         description:
-          "The voucher provider's name, in lowercase, with symbols removed, spaces replaced by `_` and repeated `_` collapsed into one. For example, `Co-operating & Helping 4ever` becomes `cooperating_helping_4ever`.",
+          "The voucher provider's name, made completely lowercase, with every symbol removed (anything except letters, numbers and spaces), each space replaced by `_`, and repeated `_` collapsed into one. For example, `Co-operating & Helping 4ever` becomes `cooperating_helping_4ever`.",
       },
     ],
   },
@@ -811,7 +811,7 @@ export const schemas = {
         required: true,
         example: 1795518005,
         description:
-          'Expiry, in seconds since the Unix epoch. PonchoPay rejects tokens that expire more than 5 seconds after `iat`, so create a new token for each request.',
+          'Expiry, in seconds since the Unix epoch. PonchoPay rejects tokens that expire more than 5 seconds after `iat`, so create a new token for each request ([RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4)).',
       },
     ],
   },

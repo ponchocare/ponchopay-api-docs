@@ -10,6 +10,8 @@ import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 import ApiColumns from '../../../components/ApiColumns.astro';
 import Fields from '../../../components/Fields.astro';
 import Example from '../../../components/Example.astro';
+import { Image } from 'astro:assets';
+import jwtIoCheck from '../../../assets/jwt-io-check.png';
 
 <ApiColumns>
   Everything is signed with your [integration key](/getting-started/introduction/#set-up-your-account),
@@ -106,10 +108,25 @@ import Example from '../../../components/Example.astro';
   Create a new token for each request, right before you send it, from the exact body you'll send.
   If you change the body after signing, `sig` won't match.
 
-  <Aside title="Checking a token">
-    Paste a token into [jwt.io](https://jwt.io) to see its claims. To check the signature, use
-    `base64url(sha256(integrationKey))` as the secret and set the secret's encoding to base64url.
-  </Aside>
+  ### Example token
+
+  This is an example of a management JWT. It's for checking only: demo and production reject it.
+
+  ```txt
+  eyJhbGciOiJIUzI1NiJ9.eyJ1cm4iOiJJVVhmWUV3YyIsImVtYWlsIjoiaGVscEBwb25jaG9wYXkuY29tIiwic2lnIjoiZ3k5NFl6UWlyY2R6bGY1aEljWUJabmRkVldRZmpwOXNCWVRlL0x1b3lRYz0iLCJpYXQiOjE3NDQ3OTMwNjUsImV4cCI6MTc0NDc5MzA3MH0.jKhrWDOKKJkmaG3b2hf0f-dfHWcohyndsI340X4JjxI
+  ```
+
+  ### Check a token with jwt.io
+
+  1. Paste the token into the **Encoded value** box on [jwt.io](https://jwt.io). The **Decoded
+     header** and **Decoded payload** show what's inside, but the token isn't validated yet.
+  2. To validate it, paste the encoded hashed key into **JWT signature verification**. For the
+     example token above it's `nmlPGFX7EQ0kI16vPP0GUZUL9I2ZfR2ebZtam0ZB36U`. For your own tokens,
+     SHA-256 hash your integration key and base64url-encode the result.
+  3. Set **Encoding format** to `base64url`. jwt.io should show the token as valid with its
+     signature verified:
+
+  <Image src={jwtIoCheck} alt="jwt.io showing the example token decoded, with Valid JWT and Signature Verified, the secret pasted in and the encoding format set to base64url" />
 
   <Fragment slot="code">
     <Tabs syncKey="lang">

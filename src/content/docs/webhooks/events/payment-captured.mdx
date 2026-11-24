@@ -16,13 +16,17 @@ import Example from '../../../../components/Example.astro';
 import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
 <ApiColumns>
-  Sent when PonchoPay has the parent's card details. From this point the payment is guaranteed,
-  even if the parent doesn't finish, as long as payment guarantee is turned on in your settings.
+  Sent when the payment details have been captured: the parent made a card payment, or completed the
+  card pre-authorisation for a Tax-Free Childcare or voucher payment. From this point the payment can
+  be guaranteed even if the parent abandons it midway, if the payment guarantee option is selected
+  in your settings.
 
-  - **Card, Apple Pay, Google Pay, Klarna, Pay by Bank or Express Tax-Free Childcare**: sent when
-    checkout finishes, at the same time as [`payment_completed`](/webhooks/events/payment-completed/).
-  - **Standard Tax-Free Childcare or childcare vouchers**: sent when the parent leaves their card as
-    a guarantee, before they pay outside PonchoPay. Not sent if payment guarantee is turned off.
+  - **Card or Express Tax-Free Childcare**: sent at the same time as
+    [`payment_completed`](/webhooks/events/payment-completed/).
+  - **Standard Tax-Free Childcare or childcare vouchers**: sent when the parent completes the card
+    pre-authorisation, before they pay outside PonchoPay.
+
+  Not sent if payment guarantee is turned off.
 
   Use it to hold the place or booking. Wait for `payment_completed` before treating the payment as
   paid.

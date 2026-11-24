@@ -7,19 +7,21 @@ import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 import ApiColumns from '../components/ApiColumns.astro';
 
 <ApiColumns>
-  1. Read the body as a raw string. Don't parse it and re-serialise it, as that changes the bytes
-     and the signature won't match.
+  1. Read the body as a raw string. Some libraries parse JSON automatically: parsing it before it's
+     verified is potentially unsafe, and serialising it back into a string can change the bytes so
+     the signature won't match.
   2. Compute the HMAC-SHA256 of the raw body using your integration key, encoded as URL-safe
      Base64 without padding ([RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648#section-5)).
-  3. Compare it with the `signature` header, using a constant-time comparison. If they don't match,
-     reject the request.
+  3. Compare it with the `signature` header, using a constant-time comparison. If the header is
+     missing or they don't match, reject the request.
   4. Parse the JSON. Skip it if you've already handled its `id`, then act on its `event`.
-  5. Respond quickly with a `2xx` status. Do slow work, such as sending emails, after responding.
+  5. PonchoPay doesn't expect a response body. Reply quickly with a `2xx` status, and do slow work,
+     such as sending emails, after replying.
 
   <Aside type="caution" title="Expect duplicates">
-    The same event can reach you more than once, for example when it's resent from PonchoPay. A
-    resent event keeps its original `id` and `date`, so store the `id`s you've handled and skip
-    repeats.
+    The same event can reach you more than once, for example when it's manually resent from
+    PonchoPay. A resent event keeps its original `id` and `date`, so store the `id`s you've handled
+    and skip repeats.
   </Aside>
 
   <Fragment slot="code">

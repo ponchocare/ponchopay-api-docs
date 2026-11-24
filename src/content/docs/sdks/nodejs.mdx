@@ -25,6 +25,8 @@ import Fields from '../../../components/Fields.astro';
     npm install @ponchopay/pp-nodejs
     ```
 
+    You can also use your favourite package manager, such as `yarn add` or `pnpm add`.
+
     ```ts
     import { Client, createToken, parseCallback } from '@ponchopay/pp-nodejs';
     ```
@@ -59,6 +61,8 @@ import Fields from '../../../components/Fields.astro';
   `client.initiatePayment()` creates a payment and resolves to the checkout URL. Redirect the parent
   there. It calls [Initiate a payment](/endpoints/initiate-payment/) and computes the `token` for
   you, so pass every parameter except `token`. `expiry` can be a `Date` or an ISO 8601 string.
+
+  The parameter types shown are the API's. In the SDK, amounts are `number`s, dates (`expiry`, `ending.date`) can be a `Date` object or an ISO 8601 string, and `weekdays` is a `Set` of `Weekday` values.
 
   <Fields schema="InitiatePayment" omit={['token']} />
 
@@ -95,6 +99,8 @@ import Fields from '../../../components/Fields.astro';
   parent sets it up. It calls [Initiate a subscription](/endpoints/initiate-subscription/) and
   computes the `token`. Dates can be `Date` objects. For weekly repetitions, pass `weekdays` as a
   `Set` of the exported `Weekday` values.
+
+  The parameter types shown are the API's. In the SDK, amounts are `number`s, dates (`expiry`, `ending.date`) can be a `Date` object or an ISO 8601 string, and `weekdays` is a `Set` of `Weekday` values.
 
   <Fields schema="InitiateSubscription" omit={['token']} />
 
@@ -182,7 +188,8 @@ import Fields from '../../../components/Fields.astro';
   - `updatePaymentMethod()` changes one payment method's amount or type. Use the exported
     `PaymentMethodType` values (`card`, `childcare-voucher`, `tax-free-childcare`), which differ
     from the webhook names. See [Update a payment method](/endpoints/update-payment-method/).
-  - `refundPaymentMethod()` refunds all or part of a card payment method. See
+  - `refundPaymentMethod()` fully or partially refunds a card payment method. `amount` can't be more
+    than what's left to refund on that payment method. See
     [Refund a payment method](/endpoints/refund-payment-method/).
   - `cancelPayment()` and `cancelRecursion()` cancel a payment or recurring payment. See
     [Cancel a payment](/endpoints/cancel-payment/) and
@@ -247,25 +254,51 @@ import Fields from '../../../components/Fields.astro';
 ## Reference
 
 <ApiColumns>
-  | Export | Returns | API |
+  | Declaration | Returns | API |
   | --- | --- | --- |
-  | `new Client(key, base?)` | A client. `base` defaults to `https://pay.ponchopay.com/` | |
-  | `client.initiatePayment(init)` | `Promise<string>`: checkout URL | [Initiate a payment](/endpoints/initiate-payment/) |
-  | `client.initiateSubscription(init)` | `Promise<string>`: set-up URL | [Initiate a subscription](/endpoints/initiate-subscription/) |
-  | `client.validateLocationUrn({ urn, email })` | `Promise<{ verification_status, card_payments_enabled, childcare_voucher_payments_enabled, tax_free_childcare_payments_enabled }>` | [Validate location](/endpoints/validate-location/) |
-  | `client.updatePaymentMethod(id, { urn, email, type, amount, voucher_provider? })` | `Promise<void>` | [Update a payment method](/endpoints/update-payment-method/) |
-  | `client.refundPaymentMethod(id, { urn, email, amount })` | `Promise<void>` | [Refund a payment method](/endpoints/refund-payment-method/) |
-  | `client.cancelPayment(id, { urn, email })` | `Promise<void>` | [Cancel a payment](/endpoints/cancel-payment/) |
-  | `client.cancelRecursion(id, { urn, email })` | `Promise<void>` | [Cancel a subscription](/endpoints/cancel-subscription/) |
-  | `createToken(key, metadata)` | `string`: initiation token | [Initiation token](/getting-started/authentication/#initiation-token) |
-  | `createJWT(urn, key, email, body)` | `Promise<string>`: management JWT, valid for 5 seconds | [Management JWT](/getting-started/authentication/#management-jwt) |
-  | `parseCallback<T>(key, request)` | `Promise<T>`: parsed webhook body. Throws if the signature is invalid | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
-  | `isValidCallback(key, request)` | `Promise<boolean>` | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `new Client(key: string, base?: string)` | A client. `base` defaults to `https://pay.ponchopay.com/` | |
+  | `client.initiatePayment(init: PaymentInit): Promise<string>` | The payment URL the parent must follow to complete the payment | [Initiate a payment](/endpoints/initiate-payment/) |
+  | `client.initiateSubscription(init: SubscriptionInit): Promise<string>` | The URL the parent must follow to set up the recurring payment | [Initiate a subscription](/endpoints/initiate-subscription/) |
+  | `client.validateLocationUrn(payload: JWTPayload): Promise<object>` | `{ verification_status, card_payments_enabled, childcare_voucher_payments_enabled, tax_free_childcare_payments_enabled }` | [Validate location](/endpoints/validate-location/) |
+  | `client.updatePaymentMethod(paymentMethodId: string, update: PaymentMethodUpdate): Promise<void>` | Nothing | [Update a payment method](/endpoints/update-payment-method/) |
+  | `client.refundPaymentMethod(paymentMethodId: string, refund: PaymentMethodRefund): Promise<void>` | Nothing | [Refund a payment method](/endpoints/refund-payment-method/) |
+  | `client.cancelPayment(paymentId: string, payload: JWTPayload): Promise<void>` | Nothing | [Cancel a payment](/endpoints/cancel-payment/) |
+  | `client.cancelRecursion(recursionId: string, payload: JWTPayload): Promise<void>` | Nothing | [Cancel a subscription](/endpoints/cancel-subscription/) |
+  | `createToken(key: string, metadata: string): string` | The token for the initiation endpoints | [Initiation token](/getting-started/authentication/#initiation-token) |
+  | `createJWT(urn: string, key: string, email: string, data: string): Promise<string>` | The JWT for the management endpoints, valid for 5 seconds. `data` is the body to be sent | [Management JWT](/getting-started/authentication/#management-jwt) |
+  | `parseCallback<T>(key: string, request: Request): Promise<T>` | The parsed webhook body, after checking it comes from PonchoPay. Throws if it doesn't | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `isValidCallback(key: string, request: Request): Promise<boolean>` | Whether the webhook comes from PonchoPay and hasn't been tampered with | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
   | `Weekday` | Enum: `Monday` … `Sunday` (`'monday'` … `'sunday'`) | [SubscriptionRepetition](/objects/subscription-repetition/) |
   | `PaymentMethodType` | Enum: `Card`, `ChildcareVouchers`, `TaxFreeChildcare` | [UpdatePaymentMethod](/endpoints/update-payment-method/) |
+
+  Parameter types:
+
+  - `PaymentInit`: the [Initiate a payment](/endpoints/initiate-payment/) parameters without `token`.
+  - `SubscriptionInit`: the [Initiate a subscription](/endpoints/initiate-subscription/) parameters
+    without `token`.
+  - `JWTPayload`: `{ urn: string; email: string }`. `urn` is the location's Unique Reference
+    Number. `email` is who authored the request, and doesn't need to be a PonchoPay user.
+  - `PaymentMethodUpdate`: `JWTPayload` plus the
+    [Update a payment method](/endpoints/update-payment-method/) body.
+  - `PaymentMethodRefund`: `JWTPayload` plus `amount`, as in
+    [Refund a payment method](/endpoints/refund-payment-method/).
 
   <Aside title="Telemetry">
     Every request includes an `x-telemetry` header with the SDK's name and version and your Node.js
     version, platform and architecture. It contains no personal or payment data.
   </Aside>
+</ApiColumns>
+
+## Develop the SDK
+
+<ApiColumns>
+  To work on the SDK itself, clone its repository and use these commands.
+
+  <Fragment slot="code">
+    ```bash
+    npm run lint     # check linting and formatting
+    npm run format   # fix linting and formatting
+    npm run test     # run the tests
+    ```
+  </Fragment>
 </ApiColumns>

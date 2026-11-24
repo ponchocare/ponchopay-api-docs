@@ -63,8 +63,8 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
 <ApiColumns>
   `$client->initiatePayment()` creates a payment and returns the checkout URL. Redirect the parent
   there. It calls [Initiate a payment](/endpoints/initiate-payment/) and computes the `token` for
-  you, so pass every parameter except `token`, as an array. `expiry` can be a
-  `DateTimeInterface` or an ISO 8601 string.
+  you, so pass every parameter except `token`, as an array. Nested objects are associative arrays.
+  `expiry` can be a `DateTimeInterface` or an ISO 8601 string.
 
   <Fields schema="InitiatePayment" omit={['token']} />
 
@@ -153,7 +153,8 @@ checks the `signature` header with `hash_hmac` and `hash_equals`, then parses th
   - `updatePaymentMethod()` changes one payment method's amount or type. `type` is `card`,
     `childcare-voucher` or `tax-free-childcare`, which differ from the webhook names. See
     [Update a payment method](/endpoints/update-payment-method/).
-  - `refundPaymentMethod()` refunds all or part of a card payment method. See
+  - `refundPaymentMethod()` fully or partially refunds a card payment method. `amount` can't be more
+    than what's left to refund on that payment method. See
     [Refund a payment method](/endpoints/refund-payment-method/).
   - `cancelPayment()` and `cancelRecursion()` cancel a payment or recurring payment. See
     [Cancel a payment](/endpoints/cancel-payment/) and
@@ -238,4 +239,17 @@ checks the `signature` header with `hash_hmac` and `hash_equals`, then parses th
     Every request includes an `x-telemetry` header with the SDK's name and version and your PHP
     version, operating system and architecture. It contains no personal or payment data.
   </Aside>
+</ApiColumns>
+
+## Develop the SDK
+
+<ApiColumns>
+  To work on the SDK itself, clone its repository and use these commands.
+
+  <Fragment slot="code">
+    ```bash
+    composer exec php-cs-fixer fix .   # fix linting and formatting
+    composer exec phpunit tests/       # run the tests
+    ```
+  </Fragment>
 </ApiColumns>

@@ -6,6 +6,8 @@ sidebar:
 ---
 
 import { Aside, Steps, LinkCard, CardGrid } from '@astrojs/starlight/components';
+import enablePaymentMethods from '../../../assets/enable-payment-methods.png';
+import { Image } from 'astro:assets';
 
 The PonchoPay API lets your system take childcare payments through PonchoPay: cards, Pay by Bank,
 Tax-Free Childcare and childcare vouchers, in one checkout. You create payments and recurring
@@ -56,14 +58,21 @@ key for production.
 
 1. **Create your user account.** Open the admin for the environment (see the table above). When
    asked to log in, choose **Sign up**, and use the email address you gave your account manager. If
-   you haven't given one, email [support@ponchopay.com](mailto:support@ponchopay.com).
+   you haven't given one, email your account manager or
+   [support@ponchopay.com](mailto:support@ponchopay.com).
 
-2. **Turn on payment methods.** In **Settings**, turn on at least one payment method. You can't
-   create payments until you do.
+2. **Turn on payment methods.** In the admin settings
+   ([demo](https://demo.ponchopay.com/provider/admin/settings),
+   [production](https://pay.ponchopay.com/provider/admin/settings)), turn on at least one payment
+   method: **Enable Tax-Free Childcare payments**, **Enable Childcare Vouchers payments** or
+   **Enable Credit/Debit Card payments**. You can't create payments until you do.
+
+   <Image src={enablePaymentMethods} alt="The payment method settings, with a checkbox each to enable Tax-Free Childcare, Childcare Vouchers and Credit/Debit Card payments" width={440} />
 
    Apple Pay is turned on for you. If you'd rather not accept it, tell your account manager.
-   Google Pay needs your Google payments merchant ID: [find it](https://support.google.com/paymentscenter/answer/7163092?hl=en-GB)
-   and send it to your account manager.
+   Google Pay needs your Google payments `paymentId`:
+   [find it](https://support.google.com/paymentscenter/answer/7163092?hl=en-GB) and send it to your
+   account manager to get you set up.
 
 3. **Get your integration key.** In **Settings → API integration**, tick **Enable API
    integration** and save. Refresh the page and copy the integration key.

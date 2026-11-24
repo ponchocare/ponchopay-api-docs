@@ -14,8 +14,10 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
 <ApiColumns>
   PonchoPay sends webhooks to your server as payments and recurring payments move on: when the
   parent leaves their card, when the payment completes, when the money reaches the provider's bank,
-  and when anything changes. Handling them keeps your system in step with PonchoPay, so you don't
-  miss payments or chase parents who've already paid.
+  and when anything changes. Implementing them correctly keeps your system in sync with PonchoPay,
+  reducing the risk of discrepancies, missed payments or poor experiences for parents. If you don't
+  follow the recommended implementation, your integration may be incomplete and you won't get the
+  full value of PonchoPay.
 
   Each event has its own URL. Set the ones you want in the PonchoPay admin under **Settings → API
   integration**. You can use the same URL for several events: the body's `event` field says which
@@ -35,8 +37,10 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
 <ApiColumns>
   Four events follow a payment from checkout to the provider's bank:
 
-  1. [`payment_captured`](/webhooks/events/payment-captured/): the parent finished card checkout, or
-     left their card as a guarantee for a Tax-Free Childcare or voucher payment.
+  1. [`payment_captured`](/webhooks/events/payment-captured/): the parent completed the card
+     pre-authorisation for a Tax-Free Childcare or voucher payment. Also sent at the same time as
+     `payment_completed` for card and Express Tax-Free Childcare payments. Not sent if payment
+     guarantee is turned off.
   2. [`payment_reported_complete`](/webhooks/events/payment-reported-complete/): the parent says
      they've paid outside PonchoPay, with Standard Tax-Free Childcare or vouchers. It's their claim,
      backed by the card guarantee.
@@ -59,9 +63,14 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
   </details>
 
   <Fragment slot="code">
-    ```txt title="Card, Apple Pay, Google Pay, Klarna, Pay by Bank, Express TFC"
+    ```txt title="Card, Express Tax-Free Childcare"
     checkout finished      → payment_captured
                            → payment_completed
+    money found in bank    → payment_in_bank
+    ```
+
+    ```txt title="Bank payments"
+    funds captured         → payment_completed
     money found in bank    → payment_in_bank
     ```
 
@@ -94,8 +103,8 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
   Recurring payments (subscriptions) have their own events, with a
   [SubscriptionCallback](/objects/subscription-callback/) body:
 
-  - [`recurring_payment_captured`](/webhooks/events/recurring-payment-captured/): the parent left a
-    card as a guarantee.
+  - [`recurring_payment_captured`](/webhooks/events/recurring-payment-captured/): the parent
+    completed the card pre-authorisation for a Tax-Free Childcare or voucher recurring payment.
   - [`recurring_payment_set_up`](/webhooks/events/recurring-payment-set-up/): the recurring payment
     is ready to take payments.
   - [`recurring_payment_cancel`](/webhooks/events/recurring-payment-cancel/): the recurring payment
@@ -113,8 +122,8 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
 
   <Fields schema="WebhookHeaders" />
 
-  Respond with any `2xx` status. PonchoPay records your response, and an event can be resent from
-  PonchoPay with the same `id`, so make your handler safe to run twice.
+  PonchoPay doesn't expect a response body: reply with any `2xx` status. An event can be manually
+  resent from PonchoPay with the same `id`, so make your handler safe to run twice.
 
   <Fragment slot="code">
     ```http title="Example request"

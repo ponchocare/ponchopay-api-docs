@@ -110,7 +110,7 @@ import Fields from '../../../components/Fields.astro';
   that endpoint's parameters:
 
   - Write nested values in dot notation: `constraints.minimum_card_amount`.
-  - Write each line item with its index: `line_items.0.description`, `line_items.0.amount`,
+  - Write each line item with its zero-based index: `line_items.0.description`, `line_items.0.amount`,
     `line_items.0.quantity`, then `line_items.1.…` and so on.
   - Add `base="https://demo.ponchopay.com/"` to use the demo environment.
 
@@ -244,7 +244,7 @@ import Fields from '../../../components/Fields.astro';
         </pp-payment>
         ```
 
-        Or turn off SSR for the route with `export const ssr = false;` in its `+page.js`.
+        Or make the route non-SSR with [`export const ssr = false;`](https://svelte.dev/docs/kit/page-options#ssr) in its `+page.js`.
       </TabItem>
       <TabItem label="React / Next.js">
         ```tsx
@@ -275,5 +275,20 @@ import Fields from '../../../components/Fields.astro';
         ```
       </TabItem>
     </Tabs>
+  </Fragment>
+</ApiColumns>
+
+## Develop the SDK
+
+<ApiColumns>
+  To work on the SDK itself, clone its repository and use these commands. Most tool configuration lives in `package.json`. `npm run start` starts a development server and opens `example/index.html`, which has examples of both components.
+
+  <Fragment slot="code">
+    ```bash
+    npm run lint     # check linting and formatting
+    npm run format   # fix linting and formatting
+    npm run test     # run the tests
+    npm run start    # open the example pages with vite
+    ```
   </Fragment>
 </ApiColumns>

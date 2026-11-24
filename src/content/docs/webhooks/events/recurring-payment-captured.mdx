@@ -16,8 +16,10 @@ import Example from '../../../../components/Example.astro';
 import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
 <ApiColumns>
-  Sent when the parent leaves their card details for a recurring payment. From this point the
-  payments it takes can be guaranteed, as long as payment guarantee is turned on in your settings.
+  Sent when the parent completes the card pre-authorisation for a Tax-Free Childcare or voucher
+  recurring payment: its payment details have been captured. From this point the payments it
+  generates can be guaranteed, if the payment guarantee option is selected in your settings.
+
   Not sent if payment guarantee is turned off.
 
   <Fragment slot="code">
@@ -34,7 +36,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   <Fields schema="SubscriptionCallback" />
 
   <Fragment slot="code">
-    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_captured' }} />
+    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_captured', 'request.metadata': 'membership-2291', 'subscription.payment_methods.0.amount': 8500 }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     recurring payment.
   </Fragment>
