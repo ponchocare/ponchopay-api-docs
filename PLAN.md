@@ -196,6 +196,14 @@ Deliberate differences kept, because the code shows Notion was wrong or incomple
   and payment methods that have already taken a payment (`HasNonZeroPaymentError`) can't be
   updated, and a request that changes nothing is a no-op. The `Invalid data` message mapped in the
   controller is never raised (`IsNotChildcareVoucherError` is never thrown), so it isn't listed.
+- **Captured events and payment guarantee**: Notion says captured events aren't sent when payment
+  guarantee is off. The code always sends `payment_captured` for card, Pay by Bank and Express TFC
+  (`IntentManager.paymentCaptured` only records why the guarantee was skipped), and sends
+  `recurring_payment_captured` for card recurring payments too, just before
+  `recurring_payment_set_up` (`preauth.recursion.eventProcessor.ts`). The guarantee caveat is kept
+  only for Standard TFC and voucher pre-authorisations.
+- **Resent events** replay the stored body, so `payment` and `subscription` are described as the
+  details when the event was first sent.
 - **Error tables follow the code**: `Invalid body` only comes from the DTOs' `isValid()` checks;
   missing or wrong-type fields get a validation message naming the field. `Invalid repetition`
   can't be reached, `Invalid ending` means `ending.date` leaves no payments, and `Payments not

@@ -153,7 +153,7 @@ checks the `signature` header with `hash_hmac` and `hash_equals`, then parses th
   - `updatePaymentMethod()` changes one payment method's amount or type. `type` is `card`,
     `childcare-voucher` or `tax-free-childcare`, which differ from the webhook names. See
     [Update a payment method](/endpoints/update-payment-method/).
-  - `refundPaymentMethod()` fully or partially refunds a card payment method of a payment. `amount`
+  - `refundPaymentMethod()` fully or partially refunds a card payment method of a payment, or a Tax-Free Childcare or voucher payment method charged to the parent's card through the payment guarantee. `amount`
     can't be more than what's left to refund on that payment method. Recurring payments can't be
     refunded: refund the payments they generate. See
     [Refund a payment method](/endpoints/refund-payment-method/).

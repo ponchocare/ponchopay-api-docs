@@ -189,7 +189,7 @@ export const schemas = {
         example: 'payment_completed',
         description: 'Which event this is.',
         enum: [
-          { value: 'payment_captured', description: 'The parent made a card, Pay by Bank or Express Tax-Free Childcare payment, or completed the card pre-authorisation for a Standard Tax-Free Childcare or voucher payment. Not sent if payment guarantee is turned off.' },
+          { value: 'payment_captured', description: 'The parent made a card, Pay by Bank or Express Tax-Free Childcare payment, or completed the card pre-authorisation for a Standard Tax-Free Childcare or voucher payment (not sent for those if payment guarantee is turned off).' },
           { value: 'payment_updated', description: 'The amount or a payment method changed.' },
           { value: 'payment_reported_complete', description: "The parent says they've paid with Standard Tax-Free Childcare or childcare vouchers, outside PonchoPay." },
           { value: 'payment_completed', description: 'The parent has done everything needed for the payment to be taken from the payment method they chose (for Standard Tax-Free Childcare and vouchers on the current lifecycle, once it\'s confirmed in bank).' },
@@ -201,7 +201,7 @@ export const schemas = {
       {
         name: 'payment',
         type: 'object',
-        description: "The payment's current details.",
+        description: "The payment's details when the event was first sent.",
         children: 'Payment',
       },
       {
@@ -408,7 +408,7 @@ export const schemas = {
         enum: [
           {
             value: 'recurring_payment_captured',
-            description: 'The parent completed the card pre-authorisation for a Tax-Free Childcare or voucher recurring payment. Not sent if payment guarantee is turned off.',
+            description: 'The parent completed the card pre-authorisation for a recurring payment. For Tax-Free Childcare and vouchers, not sent if payment guarantee is turned off.',
           },
           {
             value: 'recurring_payment_set_up',
@@ -423,7 +423,7 @@ export const schemas = {
       {
         name: 'subscription',
         type: 'object',
-        description: "The recurring payment's current details.",
+        description: "The recurring payment's details when the event was first sent.",
         children: 'Subscription',
       },
       {

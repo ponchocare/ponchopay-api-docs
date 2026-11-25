@@ -20,8 +20,8 @@ import ApiColumns from '../components/ApiColumns.astro';
 
   <Aside type="caution" title="Expect duplicates">
     The same event can reach you more than once, for example when it's manually resent from
-    PonchoPay. A resent event keeps its original `id` and `date`, so store the `id`s you've handled
-    and skip repeats.
+    PonchoPay. A resent event keeps its original `id`, `date` and body, so store the `id`s you've
+    handled and skip repeats rather than overwriting newer data.
   </Aside>
 
   <Fragment slot="code">

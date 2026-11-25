@@ -1,6 +1,6 @@
 ---
 title: Payment captured
-description: "The payment_captured webhook. Sent when the parent pays by card, Pay by Bank or Express Tax-Free Childcare, or completes the card pre-authorisation for a Standard Tax-Free Childcare or voucher payment. Not sent if payment guarantee is turned off."
+description: "The payment_captured webhook. Sent when the parent pays by card, Pay by Bank or Express Tax-Free Childcare, or completes the card pre-authorisation for a Standard Tax-Free Childcare or voucher payment (not sent for those if payment guarantee is turned off)."
 tableOfContents: false
 sidebar:
   order: 1
@@ -27,7 +27,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   - **Standard Tax-Free Childcare or childcare vouchers**: sent when the parent completes the card
     pre-authorisation, before they pay outside PonchoPay.
 
-  Not sent if payment guarantee is turned off.
+  For Standard Tax-Free Childcare and vouchers, not sent if payment guarantee is turned off.
 
   Use it to hold the place or booking. Wait for `payment_completed` before treating the payment as
   paid.
@@ -59,8 +59,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 ## Test it
 
 <ApiColumns>
-  On the demo environment, with payment guarantee turned on in your settings,
-  [initiate a payment](/endpoints/initiate-payment/) and enter a
+  On the demo environment, [initiate a payment](/endpoints/initiate-payment/) and enter a
   [test card](/getting-started/testing/#test-cards) in checkout.
 
   See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.

@@ -1,6 +1,6 @@
 ---
 title: Recurring payment captured
-description: "The recurring_payment_captured webhook. Sent when the parent completes the card pre-authorisation for a Tax-Free Childcare or voucher recurring payment. Not sent if payment guarantee is turned off."
+description: "The recurring_payment_captured webhook. Sent when the parent completes the card pre-authorisation for a recurring payment (for Tax-Free Childcare and vouchers, not if payment guarantee is turned off)."
 tableOfContents: false
 sidebar:
   order: 8
@@ -16,11 +16,14 @@ import Example from '../../../../components/Example.astro';
 import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
 <ApiColumns>
-  Sent when the parent completes the card pre-authorisation for a Tax-Free Childcare or voucher
-  recurring payment: its payment details have been captured. From this point the payments it
-  generates can be guaranteed, if the payment guarantee option is selected in your settings.
+  Sent when the parent completes the card pre-authorisation for a recurring payment: its payment
+  details have been captured.
 
-  Not sent if payment guarantee is turned off.
+  - **Card recurring payments**: sent just before
+    [`recurring_payment_set_up`](/webhooks/events/recurring-payment-set-up/).
+  - **Tax-Free Childcare or voucher recurring payments**: from this point the payments it generates
+    can be guaranteed, if the payment guarantee option is selected in your settings. Not sent if
+    payment guarantee is turned off.
 
   <Fragment slot="code">
     <Event name="recurring_payment_captured" setting="Recurring payment captured" />

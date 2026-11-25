@@ -22,8 +22,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
   - **Card, Pay by Bank or Express Tax-Free Childcare payments**: as soon as checkout finishes and
     the funds are captured.
-    [`payment_captured`](/webhooks/events/payment-captured/) is sent at the same time, unless
-    payment guarantee is turned off.
+    [`payment_captured`](/webhooks/events/payment-captured/) is sent at the same time.
   - **Offline payments, such as Standard Tax-Free Childcare or childcare vouchers**: once PonchoPay
     has confirmed the payment is in the provider's bank. This can be 2 or more days after checkout, because of voucher providers'
     payment terms.
