@@ -18,14 +18,14 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 <ApiColumns>
   Sent when the payment details have been captured: the parent made a card, Pay by Bank or Express
   Tax-Free Childcare payment, or completed the card pre-authorisation for a Standard Tax-Free
-  Childcare or voucher payment. From this point the payment can
-  be guaranteed even if the parent abandons it midway, if the payment guarantee option is selected
-  in your settings.
+  Childcare or voucher payment.
 
   - **Card, Pay by Bank or Express Tax-Free Childcare**: sent at the same time as
     [`payment_completed`](/webhooks/events/payment-completed/).
   - **Standard Tax-Free Childcare or childcare vouchers**: sent when the parent completes the card
-    pre-authorisation, before they pay outside PonchoPay.
+    pre-authorisation, before they pay outside PonchoPay. From this point the payment can be
+    guaranteed even if the parent abandons it midway, if the payment guarantee option is selected in
+    your settings.
 
   For Standard Tax-Free Childcare and vouchers, not sent if payment guarantee is turned off.
 

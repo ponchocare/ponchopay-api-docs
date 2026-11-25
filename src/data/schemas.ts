@@ -102,7 +102,7 @@ export const schemas = {
         type: 'string',
         example: '2026-12-31T23:59:59.000Z',
         description:
-          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details (you get the [`payment_captured`](/webhooks/events/payment-captured/) webhook when they do, if payment guarantee is turned on). Once a payment has expired, nothing more can be done with it.',
+          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details (you get the [`payment_captured`](/webhooks/events/payment-captured/) webhook when they do; for Standard Tax-Free Childcare and vouchers, only if payment guarantee is turned on). Once a payment has expired, nothing more can be done with it.',
       },
       {
         name: 'constraints',
@@ -706,7 +706,7 @@ export const schemas = {
         name: 'expiry',
         type: 'string',
         description:
-          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details (you get the [`payment_captured`](/webhooks/events/payment-captured/) webhook when they do, if payment guarantee is turned on). Once a payment has expired, nothing more can be done with it.',
+          'When the payment expires, as an [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date-time. It must be at least 10 minutes after the request. Defaults to 30 days. The parent has until then to add their card details (you get the [`payment_captured`](/webhooks/events/payment-captured/) webhook when they do; for Standard Tax-Free Childcare and vouchers, only if payment guarantee is turned on). Once a payment has expired, nothing more can be done with it.',
       },
       {
         name: 'constraints',
