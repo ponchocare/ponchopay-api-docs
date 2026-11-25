@@ -219,13 +219,14 @@ parameter names, an `isValidCallback` example, and examples that disagreed with 
 All fixed.
 
 Three questions Notion didn't answer, confirmed by the product owner on 24 Nov 2026 and now
-documented:
+documented (the second corrected on 25 Nov 2026 to follow the code):
 
 - **Pay by Bank** works the same as card payments: `payment_captured` and `payment_completed` are
   sent together when checkout finishes.
-- **No payment method, no webhook**: a payment has no payment method until the parent selects one,
-  and no webhooks are sent before then. So cancelling a payment before a method is selected sends
-  no `payment_cancelled`.
+- **No payment method, almost no webhooks**: a payment has no payment method until the parent
+  selects one, and no webhooks are sent before then, with one exception. Cancelling it still sends
+  `payment_cancelled` (`IntentManager.cancel()` in `src/be/intent/manager.ts` doesn't check), with
+  `payment_methods` empty and `method` set to the `ponchopay` fallback (`serialiser.ts`).
 - **Refunds apply to payments only**: recurring payments generate payments and can't be refunded
   themselves, so the refund fields in a recurring payment's payment methods are always `0`.
 

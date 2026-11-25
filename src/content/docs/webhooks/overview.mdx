@@ -19,8 +19,9 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
   follow the recommended implementation, your integration may be incomplete and you won't get the
   full value of PonchoPay.
 
-  A payment has no payment method until the parent selects one in checkout, and PonchoPay sends no
-  webhooks for it until then.
+  A payment has no payment method until the parent selects one in checkout. Until then PonchoPay
+  sends no webhooks for it, unless it's cancelled: `payment_cancelled` is still sent, with an empty
+  `payment_methods`.
 
   Each event has its own URL. Set the ones you want in the PonchoPay admin under **Settings → API
   integration**. You can use the same URL for several events: the body's `event` field says which

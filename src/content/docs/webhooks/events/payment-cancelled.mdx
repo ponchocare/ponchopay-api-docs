@@ -20,8 +20,9 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   [Cancel a payment](/endpoints/cancel-payment/) or the admin. The parent can no longer pay it. Not
   every payment can be cancelled.
 
-  It's only sent if the parent had already selected a payment method. A payment cancelled before
-  that has no payment method, so no webhook is sent.
+  It's also sent if the parent hadn't selected a payment method yet. The payment has no payment
+  method then, so `payment_methods` is empty and `method` is `ponchopay`. This is the only webhook
+  sent before a payment method is selected.
 
   Use it to release the booking or close the order in your system.
 
@@ -40,6 +41,7 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
 
   <Fragment slot="code">
     <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_cancelled', id: '7a8b9c0d-1e2f-4a3b-4c5d-6e7f8a9b0c17', date: '2026-11-24T12:30:00.000Z', 'payment.method': 'tax_free_childcare', 'payment.payment_methods.0.type': 'tax_free_childcare', 'payment.payment_methods.0.variant': 'manual', 'payment.id': 'e2f4a6c8-0b1d-4e3f-9a5c-7d9e1b3c5f84', 'payment.reference': 'PP-9C4l6X', 'payment.payment_methods.0.id': 'a3c5e7f9-1b2d-4c4e-8f6a-0b2d4f6a8c95', 'request.metadata': 'order-67654' }} />
+    <Example schema="PaymentCallback" title="Cancelled before a payment method was selected" overrides={{ event: 'payment_cancelled', id: '8b9c0d1e-2f3a-4b4c-5d6e-7f8a9b0c1d28', date: '2026-11-24T13:05:00.000Z', 'payment.method': 'ponchopay', 'payment.payment_methods': [], 'payment.id': 'b5d7f9a1-3c5e-4f7a-8b9d-1e3f5a7c9e06', 'payment.reference': 'PP-6T1n8B', 'request.metadata': 'order-67655' }} />
     The values are examples. `request.metadata` is the `metadata` you sent when you created the
     payment.
   </Fragment>
@@ -55,7 +57,8 @@ import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
   On the demo environment, [initiate a payment](/endpoints/initiate-payment/) and select a payment
   method in checkout without finishing it, for example Standard Tax-Free Childcare with the card
   pre-authorisation. Then call [Cancel a payment](/endpoints/cancel-payment/) or cancel it in the
-  admin. Cancelling before a payment method is selected sends no webhook.
+  admin. To see the empty `payment_methods` case, cancel a payment before selecting a payment
+  method.
 
   See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
 

@@ -266,14 +266,14 @@ export const schemas = {
           ...PAYMENT_METHOD_TYPES,
           {
             value: 'ponchopay',
-            description: "The method couldn't be determined, or more than one payment method was used (for example, a split payment).",
+            description: "No payment method has been selected yet, more than one was used (for example, a split payment), or the method couldn't be determined.",
           },
         ],
       },
       {
         name: 'payment_methods',
         type: 'array of objects',
-        description: 'Each payment method the parent selected, and the amount allocated to it. A payment has no payment method until the parent selects one, and no webhooks are sent before then.',
+        description: 'Each payment method the parent selected, and the amount allocated to it. A payment has no payment method until the parent selects one. The only webhook sent before then is `payment_cancelled`, with this array empty.',
         children: 'PaymentMethod',
       },
     ],
