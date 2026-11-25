@@ -129,7 +129,7 @@ import Example from '../../../components/Example.astro';
 
   Payment methods of Express checkout payments, and payment methods that have been charged to the
   parent's card (for example through the payment guarantee), can't be updated: those requests are
-  rejected too. A request that changes nothing returns `204` and sends no webhook. For a childcare
+  rejected with `400 Something went wrong`. A request that changes nothing returns `204` and sends no webhook. For a childcare
   voucher payment method, send its current `voucher_provider`, or the request counts as a change.
 
   An invalid or expired token is rejected before any of these checks.
