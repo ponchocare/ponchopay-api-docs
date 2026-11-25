@@ -235,10 +235,8 @@ documented (the second corrected on 25 Nov 2026 to follow the code):
 1. **Gellix licence**: the font files are in `src/fonts/` and will be served from a public site
    and repo. Confirm the licence allows that, or switch to another typeface.
 2. **Custom domain**: for example `developers.ponchopay.com`. Needs a DNS record and `public/CNAME`.
-3. **SDK `initiateSubscription`**: the Initiate a subscription page uses the SDK method, as the
-   Notion docs did (decided 24 Nov 2026). Possible bug still to verify on demo: pp-nodejs and pp-php
-   post to `/api/integration/generic/subscription` (returns JSON) but expect a `302`, while the
-   browser SDK uses `/subscription/redirect`. If it's confirmed, fix the SDKs or change the examples.
+3. ~~**SDK `initiateSubscription`**~~: resolved 25 Nov 2026. pp-nodejs 2.0.0 and pp-php 1.6.0
+   (released 24 Nov 2026) call `/api/integration/generic/subscription/redirect`.
 4. **Pay by Bank and Klarna refunds**: the refund page says card payment methods including Pay by
    Bank and Klarna can be refunded. Confirm.
 5. **Commit and push**: nothing has been committed. Pushing to `main` deploys the site.
@@ -250,13 +248,14 @@ documented (the second corrected on 25 Nov 2026 to follow the code):
   the component never enforces them (`src/PpSubscription.ts`).
 - **pp-nodejs**: `PPError` isn't exported from the package, so callers can't use `instanceof`. The
   docs tell them to check the `[PonchoPay]` message prefix.
-- **pp-nodejs**: `isValidCallback` and `parseCallback` need a Fetch API `Request`. The Notion docs
-  called it a "NodeJS request", and Express users can't pass `req`. The docs now say so. An
-  Express-friendly helper (raw body string plus signature) would help.
-- **pp-php**: no webhook verification helpers, unlike pp-nodejs.
-- **pp-php**: needs PHP 8.4 and `symfony/http-client` 8, which rules out many shared hosts.
+- **pp-nodejs**: `parseRequest`/`parseCallback` have no payload type to pass as `T`, so callers
+  define their own (the docs show one). Exported `PaymentCallback`/`SubscriptionCallback` types
+  would help.
 - **Both server SDKs**: errors include only the status code, not PonchoPay's error message.
-- **Both server SDKs**: `initiateSubscription` may call the wrong endpoint (open question 3).
+
+Fixed by pp-nodejs 2.0.0 and pp-php 1.6.0 (24 Nov 2026), and the docs updated on 25 Nov 2026:
+webhook helpers that take the raw body and header (so Express works) as well as a request, PHP
+webhook helpers, PHP 8.2+ with Symfony 7.4 or 8, and the `initiateSubscription` endpoint.
 
 Resolved 24 Nov 2026: keep the shared demo key; keep `additional_one_time_payment.constraints`
 documented; keep the "Auth check" label; sidebar widened to 17rem so badges fit.

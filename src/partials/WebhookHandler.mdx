@@ -14,7 +14,10 @@ import ApiColumns from '../components/ApiColumns.astro';
      Base64 without padding ([RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648#section-5)).
   3. Compare it with the `signature` header, using a constant-time comparison. If the header is
      missing or they don't match, reject the request.
-  4. Parse the JSON. Skip it if you've already handled its `id`, then act on its `event`.
+  4. Parse the JSON. Skip it if you've already handled its `id`, then act on its `event`. Before
+     you fulfil an order, check `payment.amount` is what you expect: with
+     [browser checkout](/sdks/browser/), the token only signs `metadata`, so the parent can change
+     the amount.
   5. PonchoPay doesn't expect a response body. Reply quickly with a `2xx` status, and do slow work,
      such as sending emails, after replying.
 
@@ -24,18 +27,26 @@ import ApiColumns from '../components/ApiColumns.astro';
     handled and skip repeats rather than overwriting newer data.
   </Aside>
 
+  The Node.js SDK and the PHP SDK do steps 1 to 3 and the parsing for you. The Python tab shows
+  them by hand.
+
   <Fragment slot="code">
     <Tabs syncKey="lang">
       <TabItem label="Node.js">
         ```ts
         // Fetch API Request: Next.js route handlers, Hono, Remix…
-        import { parseCallback } from '@ponchopay/pp-nodejs';
+        import { Client } from '@ponchopay/pp-nodejs';
+
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY!);
+
+        // The fields read here. See PaymentCallback and SubscriptionCallback for the rest.
+        type PonchoPayEvent = { id: string; event: string; request: { metadata: string } };
 
         export async function POST(request: Request) {
-          let event;
+          let event: PonchoPayEvent;
           try {
             // Throws if the signature doesn't match.
-            event = await parseCallback(process.env.PONCHOPAY_INTEGRATION_KEY!, request);
+            event = await client.parseRequest<PonchoPayEvent>(request);
           } catch {
             return new Response('Invalid signature', { status: 401 });
           }
@@ -50,24 +61,21 @@ import ApiColumns from '../components/ApiColumns.astro';
       <TabItem label="Express">
         ```js
         import express from 'express';
-        import { createHmac, timingSafeEqual } from 'node:crypto';
+        import { Client } from '@ponchopay/pp-nodejs';
 
         const app = express();
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
 
         // express.raw keeps the body as bytes so the signature can be checked.
         app.post('/webhooks/ponchopay', express.raw({ type: 'application/json' }), async (req, res) => {
-          const payload = req.body.toString('utf8');
-          const expected = createHmac('sha256', process.env.PONCHOPAY_INTEGRATION_KEY)
-            .update(payload, 'utf8')
-            .digest('base64url');
-          const received = req.get('signature') ?? '';
-
-          if (received.length !== expected.length ||
-              !timingSafeEqual(Buffer.from(received), Buffer.from(expected))) {
+          let event;
+          try {
+            // Throws if the header is missing or the signature doesn't match.
+            event = client.parseCallback(req.get('signature') ?? '', req.body.toString('utf8'));
+          } catch {
             return res.status(401).send('Invalid signature');
           }
 
-          const event = JSON.parse(payload);
           if (!(await alreadyHandled(event.id))) {
             await handleEvent(event); // switch on event.event
           }
@@ -79,24 +87,30 @@ import ApiColumns from '../components/ApiColumns.astro';
         ```php
         <?php
 
-        $payload = file_get_contents('php://input');
-        $key = getenv('PONCHOPAY_INTEGRATION_KEY');
+        use PonchoPay\Client;
+        use PonchoPay\PonchoPayException;
 
-        $hmac = hash_hmac('sha256', $payload, $key, true);
-        $expected = rtrim(strtr(base64_encode($hmac), '+/', '-_'), '=');
-        $received = $_SERVER['HTTP_SIGNATURE'] ?? '';
+        $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
 
-        if (!hash_equals($expected, $received)) {
+        try {
+            // Throws if the header is missing or the signature doesn't match.
+            $event = $client->parseCallback(
+                $_SERVER['HTTP_SIGNATURE'] ?? '',
+                file_get_contents('php://input'),
+            );
+        } catch (PonchoPayException $e) {
             http_response_code(401);
             exit('Invalid signature');
         }
 
-        $event = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
-        if (!alreadyHandled($event['id'])) {
-            handleEvent($event); // switch on $event['event']
+        if (!alreadyHandled($event->id)) {
+            handleEvent($event); // switch on $event->event
         }
         http_response_code(204);
         ```
+
+        With a PSR-7 request (Slim, or Laravel and Symfony through their PSR-7 bridges), use
+        `$client->parseRequest($request)` instead.
       </TabItem>
       <TabItem label="Python">
         ```python

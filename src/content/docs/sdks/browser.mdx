@@ -205,6 +205,14 @@ import Fields from '../../../components/Fields.astro';
   - Attributes are live: change one with `setAttribute()` and the next submit uses the new value.
   - Call the element's `submit()` method to submit it from your own code.
 
+  <Aside type="caution" title="Check the amount before you fulfil the order">
+    The token only signs `metadata`. Everything else is in the parent's browser, so they can change
+    `amount` or `line_items` before paying, and the webhooks will describe that payment. Checking
+    the values before rendering doesn't prevent this. When you get
+    [`payment_completed`](/webhooks/events/payment-completed/), compare `payment.amount` with the
+    order total stored on your server before you fulfil the order.
+  </Aside>
+
   <Fragment slot="code">
     ```js
     const button = document.querySelector('pp-payment');
@@ -263,11 +271,17 @@ import Fields from '../../../components/Fields.astro';
           }, []);
 
           useEffect(() => {
+            const button = ref.current;
+            if (!button) return;
+            // Remove the previous basket's line items, or removed items would still be sent
+            for (const name of button.getAttributeNames()) {
+              if (name.startsWith('line_items.')) button.removeAttribute(name);
+            }
             // JSX can't write dotted attribute names
             order.items.forEach((item, i) => {
-              ref.current?.setAttribute(`line_items.${i}.description`, item.name);
-              ref.current?.setAttribute(`line_items.${i}.amount`, String(item.pricePence));
-              ref.current?.setAttribute(`line_items.${i}.quantity`, String(item.quantity));
+              button.setAttribute(`line_items.${i}.description`, item.name);
+              button.setAttribute(`line_items.${i}.amount`, String(item.pricePence));
+              button.setAttribute(`line_items.${i}.quantity`, String(item.quantity));
             });
           }, [order]);
 

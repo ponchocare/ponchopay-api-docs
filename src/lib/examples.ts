@@ -43,6 +43,42 @@ function includedByDefault(schema: Schema, field: Field): boolean {
   return schema.kind === 'request' ? Boolean(field.required) : !field.optional;
 }
 
+/**
+ * Checks that an override path names documented fields all the way down, e.g.
+ * "payment.payment_methods.0.variant": each name must be a field of the schema it's in, and an array
+ * field must be followed by an index. Optional fields the default example leaves out are allowed.
+ */
+function checkPath(schemaName: string, path: string) {
+  const segments = path.split('.');
+  let current = schemaName;
+  let schema = getSchema(current);
+  for (let i = 0; i < segments.length; i++) {
+    const field = schema.fields.find((candidate) => candidate.name === segments[i]);
+    if (!field) {
+      throw new Error(
+        `Example for "${schemaName}": "${path}" refers to "${segments[i]}", which "${current}" doesn't have.`
+      );
+    }
+    if (i === segments.length - 1) {
+      return;
+    }
+    if (!field.children) {
+      throw new Error(`Example for "${schemaName}": "${path}" goes inside "${field.name}", which has no child parameters.`);
+    }
+    if (field.type.startsWith('array')) {
+      i++;
+      if (!/^\d+$/.test(segments[i])) {
+        throw new Error(`Example for "${schemaName}": "${path}" needs an index after the array "${field.name}".`);
+      }
+      if (i === segments.length - 1) {
+        return;
+      }
+    }
+    current = field.children;
+    schema = getSchema(current);
+  }
+}
+
 /** Sets a dotted path ("payment.payment_methods.0.variant") on a built example. */
 function setPath(target: Record<string, unknown>, path: string, value: unknown, schemaName: string) {
   const keys = path.split('.');
@@ -92,11 +128,12 @@ export function buildExample(
     }
   }
 
-  const unknown = [...include, ...Object.keys(overrides).map((key) => key.split('.')[0])].filter(
-    (key) => !schema.fields.some((field) => field.name === key)
-  );
+  const unknown = include.filter((key) => !schema.fields.some((field) => field.name === key));
   if (unknown.length > 0) {
     throw new Error(`Example for "${name}" refers to fields it doesn't have: ${unknown.join(', ')}`);
+  }
+  for (const path of Object.keys(overrides)) {
+    checkPath(name, path);
   }
 
   for (const [path, value] of Object.entries(overrides)) {

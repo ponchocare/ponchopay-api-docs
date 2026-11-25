@@ -15,10 +15,10 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
 <ApiColumns>
   [`ponchopay/pp-php`](https://github.com/ponchocare/pp-php) wraps the PonchoPay API for PHP. It
   computes [tokens and JWTs](/getting-started/authentication/) for you, creates payments and
-  recurring payments, and updates, refunds and cancels payments.
+  recurring payments, verifies webhooks, and updates, refunds and cancels payments.
 
-  It needs **PHP 8.4 or later**, and installs `symfony/http-client` and `firebase/php-jwt`. It
-  doesn't verify webhooks: see [Handle webhooks](#handle-webhooks) for the few lines that do.
+  It needs **PHP 8.2 or later**, and installs `symfony/http-client` (7.4 on PHP 8.2 and 8.3, 8.x on
+  PHP 8.4 and later), `firebase/php-jwt` and `psr/http-message`.
 
   <Fragment slot="code">
     ```bash title="Install"
@@ -136,8 +136,11 @@ import WebhookHandler from '../../../partials/WebhookHandler.mdx';
 
 ## Handle webhooks
 
-The PHP SDK doesn't check webhook signatures. Use the PHP tab below: it reads the raw body,
-checks the `signature` header with `hash_hmac` and `hash_equals`, then parses the JSON.
+`$client->parseCallback($signature, $payload)` checks the `signature` header against the raw body
+and returns the parsed body as an object. `$client->parseRequest($request)` does the same from a
+PSR-7 request. Both throw `PonchoPayException` if the header is missing, the signature doesn't
+match or the body isn't a JSON object, and accept bodies up to 2 MiB. `isValidCallback()` and
+`isValidRequest()` return `true` or `false` instead. See the PHP tab below.
 
 <WebhookHandler />
 
@@ -202,6 +205,10 @@ checks the `signature` header with `hash_hmac` and `hash_equals`, then parses th
 
   Network problems surface as Symfony HTTP client exceptions.
 
+  `Client` implements `PonchoPay\ClientInterface`, so you can depend on the interface and swap in
+  a fake in your tests. `PonchoPay\Types` defines phpstan types for the payloads and responses,
+  such as `PaymentInit` and `PaymentWebhook`, to import with `@phpstan-import-type`.
+
   <Fragment slot="code">
     ```php
     <?php
@@ -233,6 +240,10 @@ checks the `signature` header with `hash_hmac` and `hash_equals`, then parses th
   | `$client->refundPaymentMethod(string $paymentMethodId, array $refund)` | `void` | [Refund a payment method](/endpoints/refund-payment-method/) |
   | `$client->cancelPayment(string $paymentId, array $payload)` | `void` | [Cancel a payment](/endpoints/cancel-payment/) |
   | `$client->cancelRecursion(string $recursionId, array $payload)` | `void` | [Cancel a subscription](/endpoints/cancel-subscription/) |
+  | `$client->parseCallback(string $signature, StreamInterface\|string $payload)` | `object`: the webhook body, after checking it comes from PonchoPay. Throws if it doesn't | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `$client->parseRequest(RequestInterface $request)` | The same, from a PSR-7 request | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `$client->isValidCallback(string $signature, StreamInterface\|string $payload)` | `bool`: whether the webhook comes from PonchoPay and hasn't been tampered with | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `$client->isValidRequest(RequestInterface $request)` | The same, from a PSR-7 request | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
   | `PonchoPay\createToken(string $key, string $metadata)` | `string`: initiation token | [Initiation token](/getting-started/authentication/#initiation-token) |
   | `PonchoPay\createJWT(string $urn, string $key, string $email, string $data)` | `string`: management JWT, valid for 5 seconds. `$data` is the body to be sent (`''` when there's none) | [Management JWT](/getting-started/authentication/#management-jwt) |
 

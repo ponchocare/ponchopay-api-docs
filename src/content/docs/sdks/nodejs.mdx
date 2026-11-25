@@ -28,7 +28,7 @@ import Fields from '../../../components/Fields.astro';
     You can also use your favourite package manager, such as `yarn add` or `pnpm add`.
 
     ```ts
-    import { Client, createToken, parseCallback } from '@ponchopay/pp-nodejs';
+    import { Client, createToken } from '@ponchopay/pp-nodejs';
     ```
   </Fragment>
 </ApiColumns>
@@ -135,38 +135,61 @@ import Fields from '../../../components/Fields.astro';
 ## Handle webhooks
 
 <ApiColumns>
-  `parseCallback(key, request)` checks a webhook's `signature` and resolves to the parsed body, or
-  throws if the signature doesn't match. `isValidCallback(key, request)` resolves to `true` or
-  `false` without parsing.
+  The client checks a webhook's `signature` header with your integration key. Use the method that
+  matches what your framework gives you:
 
-  Both take a Fetch API [`Request`](https://developer.mozilla.org/docs/Web/API/Request), as used by
-  Next.js route handlers, Hono, Remix and other modern frameworks. Express's `req` isn't one: for
-  Express, verify the signature yourself as shown in
-  [verify and handle webhooks](/webhooks/overview/#verify-and-handle-webhooks).
+  - **A Fetch API [`Request`](https://developer.mozilla.org/docs/Web/API/Request)** (Next.js route
+    handlers, Remix, Hono, Workers…): `client.parseRequest(request)` resolves to the parsed body.
+    It reads a clone, so you can still read the body yourself afterwards.
+  - **The raw body and the header** (Express, Fastify…): `client.parseCallback(signature, payload)`
+    returns the parsed body. Pass the body exactly as received, not re-serialised JSON.
+
+  Both throw a `[PonchoPay]` error if the header is missing, the signature doesn't match or the body
+  isn't a JSON object. `client.isValidRequest(request)` and `client.isValidCallback(signature,
+  payload)` return `true` or `false` instead, without parsing.
 
   The body is a [PaymentCallback](/objects/payment-callback/) or, for recurring payments, a
-  [SubscriptionCallback](/objects/subscription-callback/). Skip events whose `id` you've already
-  handled.
+  [SubscriptionCallback](/objects/subscription-callback/). The SDK doesn't export a type for it, so
+  pass your own as the type argument. Skip events whose `id` you've already handled.
+
+  Before you fulfil an order, check that `payment.amount` is what you expect. With
+  [browser checkout](/sdks/browser/), the token only signs `metadata`, so the parent can change the
+  amount before paying.
 
   <Fragment slot="code">
     ```ts title="app/webhooks/ponchopay/route.ts (Next.js)"
-    import { parseCallback } from '@ponchopay/pp-nodejs';
+    import { Client } from '@ponchopay/pp-nodejs';
+
+    const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY!);
+
+    // The fields this handler reads. See PaymentCallback for the rest.
+    type PaymentEvent = {
+      id: string;
+      event: string;
+      payment: { amount: number; refunded_amount: number };
+      request: { metadata: string };
+    };
 
     export async function POST(request: Request) {
-      let event;
+      let event: PaymentEvent;
       try {
-        event = await parseCallback(process.env.PONCHOPAY_INTEGRATION_KEY!, request);
+        event = await client.parseRequest<PaymentEvent>(request);
       } catch {
         return new Response('Invalid signature', { status: 401 });
       }
 
       if (!(await alreadyHandled(event.id))) {
+        const order = await findOrder(event.request.metadata);
         switch (event.event) {
           case 'payment_completed':
-            await markOrderPaid(event.request.metadata);
+            if (event.payment.amount === order.totalPence) {
+              await markOrderPaid(order);
+            } else {
+              await flagForReview(order, event);
+            }
             break;
           case 'payment_refunded':
-            await recordRefund(event.request.metadata, event.payment.refunded_amount);
+            await recordRefund(order, event.payment.refunded_amount);
             break;
         }
       }
@@ -174,13 +197,18 @@ import Fields from '../../../components/Fields.astro';
     }
     ```
 
-    ```ts title="Only check the signature"
-    import { isValidCallback } from '@ponchopay/pp-nodejs';
-
-    const valid = await isValidCallback(process.env.PONCHOPAY_INTEGRATION_KEY!, request);
-    if (!valid) {
-      return new Response('Invalid signature', { status: 401 });
-    }
+    ```ts title="Express: the raw body and the header"
+    // express.raw keeps the body as bytes, so the signature can be checked.
+    app.post('/webhooks/ponchopay', express.raw({ type: 'application/json' }), (req, res) => {
+      let event: PaymentEvent;
+      try {
+        event = client.parseCallback<PaymentEvent>(req.get('signature') ?? '', req.body.toString('utf8'));
+      } catch {
+        return res.status(401).send('Invalid signature');
+      }
+      // …handle it as above
+      res.sendStatus(204);
+    });
     ```
   </Fragment>
 </ApiColumns>
@@ -276,8 +304,10 @@ import Fields from '../../../components/Fields.astro';
   | `client.cancelRecursion(recursionId: string, payload: JWTPayload): Promise<void>` | Nothing. Await the promise | [Cancel a subscription](/endpoints/cancel-subscription/) |
   | `createToken(key: string, metadata: string): string` | The token for the initiation endpoints | [Initiation token](/getting-started/authentication/#initiation-token) |
   | `createJWT(urn: string, key: string, email: string, data: string): Promise<string>` | The JWT for the management endpoints, valid for 5 seconds. `data` is the body to be sent | [Management JWT](/getting-started/authentication/#management-jwt) |
-  | `parseCallback<T>(key: string, request: Request): Promise<T>` | The parsed webhook body, after checking it comes from PonchoPay. Throws if it doesn't | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
-  | `isValidCallback(key: string, request: Request): Promise<boolean>` | Whether the webhook comes from PonchoPay and hasn't been tampered with | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `client.parseRequest<T extends object>(request: Request): Promise<T>` | The parsed webhook body, after checking it comes from PonchoPay. Throws if it doesn't | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `client.parseCallback<T extends object>(signature: string, payload: string): T` | The same, from the `signature` header and the raw body | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `client.isValidRequest(request: Request): Promise<boolean>` | Whether the webhook comes from PonchoPay and hasn't been tampered with | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `client.isValidCallback(signature: string, payload: string): boolean` | The same, from the `signature` header and the raw body | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
   | `Weekday` | Enum: `Monday` … `Sunday` (`'monday'` … `'sunday'`) | [SubscriptionRepetition](/objects/subscription-repetition/) |
   | `PaymentMethodType` | Enum: `Card`, `ChildcareVouchers`, `TaxFreeChildcare` | [UpdatePaymentMethod](/endpoints/update-payment-method/) |
 
