@@ -1,0 +1,312 @@
+---
+title: Browser SDK
+description: Add a PonchoPay payment or recurring payment button to any web page with the pp-payment and pp-subscription web components.
+tableOfContents: false
+sidebar:
+  label: Browser
+  order: 3
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+
+<ApiColumns>
+  [`@ponchopay/pp-browser`](https://github.com/ponchocare/pp-browser) adds two web components:
+  `<pp-payment>` and `<pp-subscription>`. Each renders a button that posts a form to PonchoPay, so
+  the browser goes straight to the checkout. Your server's only job is to compute the `token`.
+
+  They work in plain HTML and in any framework, and render a button styled in PonchoPay colours
+  that you can restyle.
+
+  <Fragment slot="code">
+    ```html
+    <script src="https://pay.ponchopay.com/api/integration/generic/asset/pp-browser.1.3.1.min.js"></script>
+
+    <pp-payment
+      token="TOKEN_FROM_YOUR_SERVER"
+      urn="INTTEST"
+      amount="4274"
+      metadata="order-67651"
+      email="parent@example.com"
+    ></pp-payment>
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Install
+
+<ApiColumns>
+  **From PonchoPay**: add the script tag with an exact version. The current version is `1.3.1`.
+  Each version's file never changes and is cached for a year, so pin the version you've tested.
+
+  **From npm**: install the package and import it once, on the client. Importing registers both
+  elements.
+
+  <Fragment slot="code">
+    ```html title="Script tag"
+    <script src="https://pay.ponchopay.com/api/integration/generic/asset/pp-browser.1.3.1.min.js"></script>
+    ```
+
+    ```bash title="npm"
+    npm install @ponchopay/pp-browser
+    ```
+
+    Or use the package manager you prefer, such as `yarn add` or `pnpm add`.
+
+    ```ts
+    import '@ponchopay/pp-browser';
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Compute the token on your server
+
+<ApiColumns>
+  The `token` attribute proves the request comes from you. Compute it on your server from your
+  integration key and the payment's `metadata`, then render it into the page. See
+  [initiation token](/getting-started/authentication/#initiation-token).
+
+  <Aside type="danger" title="Never put your integration key in the page">
+    Only the token goes to the browser. Anyone who has the key can create requests as you.
+  </Aside>
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { createToken } from '@ponchopay/pp-nodejs';
+
+        app.get('/basket', async (req, res) => {
+          const order = await getOrder(req.session.orderId);
+          res.render('basket', {
+            order,
+            token: createToken(process.env.PONCHOPAY_INTEGRATION_KEY, order.id),
+          });
+        });
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use function PonchoPay\createToken;
+
+        $token = createToken(getenv('PONCHOPAY_INTEGRATION_KEY'), $order->id);
+        ?>
+        <pp-payment
+          token="<?= htmlspecialchars($token) ?>"
+          metadata="<?= htmlspecialchars($order->id) ?>"
+          ...
+        ></pp-payment>
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>
+
+## `<pp-payment>`
+
+<ApiColumns>
+  Creates a payment through [Initiate a payment](/endpoints/initiate-payment/). Its attributes are
+  that endpoint's parameters:
+
+  - Write nested values in dot notation: `constraints.minimum_card_amount`.
+  - Write each line item with its zero-based index: `line_items.0.description`, `line_items.0.amount`,
+    `line_items.0.quantity`, then `line_items.1.…` and so on.
+  - Add `base="https://demo.ponchopay.com/"` to use the demo environment.
+
+  <Fields schema="InitiatePayment" />
+
+  <Fragment slot="code">
+    ```html title="Basket with line items"
+    <pp-payment
+      base="https://demo.ponchopay.com/"
+      token="TOKEN_FROM_YOUR_SERVER"
+      urn="INTTEST"
+      amount="4274"
+      metadata="order-67651"
+      email="parent@example.com"
+      line_items.0.description="Holiday club day"
+      line_items.0.amount="2000"
+      line_items.0.quantity="2"
+      line_items.1.description="Packed lunch"
+      line_items.1.amount="274"
+      line_items.1.quantity="1"
+    >Pay £42.74</pp-payment>
+    ```
+  </Fragment>
+</ApiColumns>
+
+## `<pp-subscription>`
+
+<ApiColumns>
+  Creates a recurring payment through
+  [Initiate a subscription](/endpoints/initiate-subscription/). Its attributes are that endpoint's
+  parameters, in the same dot notation: `repetition.granularity`, `ending.occurrences`,
+  `additional_one_time_payment.amount`. Write `repetition.weekdays` as a comma-separated list, such
+  as `monday,thursday`.
+
+  <Fields schema="InitiateSubscription" />
+
+  <Fragment slot="code">
+    ```html title="Monthly membership with a registration fee"
+    <pp-subscription
+      base="https://demo.ponchopay.com/"
+      token="TOKEN_FROM_YOUR_SERVER"
+      urn="INTTEST"
+      amount="8500"
+      metadata="membership-2291"
+      email="parent@example.com"
+      repetition.granularity="month"
+      repetition.period="1"
+      repetition.day="1"
+      ending.condition="occurrences"
+      ending.occurrences="12"
+      additional_one_time_payment.amount="2500"
+      additional_one_time_payment.metadata="membership-2291-registration"
+    >Join for £85 a month</pp-subscription>
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Customise the button
+
+<ApiColumns>
+  - **Label**: put your own text inside the element. Without it, the button says "Pay with
+    PonchoPay" or "Subscribe with PonchoPay". To keep the default, leave the element completely
+    empty: even whitespace, such as a space or a line break, replaces the label.
+  - **Styles**: the button and the error message are exposed as CSS parts, `button` and `error`.
+
+  <Fragment slot="code">
+    ```css
+    pp-payment::part(button),
+    pp-subscription::part(button) {
+      background: #1a2535;
+      color: #ffffff;
+      border-radius: 999px;
+    }
+
+    pp-payment::part(error) {
+      font-size: 0.875rem;
+    }
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Validation and behaviour
+
+<ApiColumns>
+  - If a required attribute is missing, the button doesn't submit and shows "Some attributes are
+    incorrect. Please, review them." Hiding the message with CSS doesn't make the button work.
+  - The component only checks that required attributes are present. PonchoPay checks everything
+    else, and if it rejects the request the parent sees its error page, so check amounts, line
+    item totals and the token on your server before rendering the button.
+  - Attributes are live: change one with `setAttribute()` and the next submit uses the new value.
+  - Call the element's `submit()` method to submit it from your own code.
+
+  <Aside type="caution" title="Check the amount before you fulfil the order">
+    The token only signs `metadata`. Everything else is in the parent's browser, so they can change
+    `amount` or `line_items` before paying, and the webhooks will describe that payment. Checking
+    the values before rendering doesn't prevent this. When you get
+    [`payment_completed`](/webhooks/events/payment-completed/), compare `payment.amount` with the
+    order total stored on your server before you fulfil the order.
+  </Aside>
+
+  <Fragment slot="code">
+    ```js
+    const button = document.querySelector('pp-payment');
+
+    // e.g. after the parent changes their basket
+    button.setAttribute('line_items.1.quantity', '2'); // a second packed lunch
+    button.setAttribute('amount', '4548');             // 2000 × 2 + 274 × 2
+    // same metadata, so the token stays the same
+
+    // submit from your own button or flow
+    button.submit();
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Frameworks and server-side rendering
+
+<ApiColumns>
+  The components need the browser's `HTMLElement`, so they can't run during server-side rendering.
+  Import the package on the client only, after the page has mounted.
+
+  In JSX (React, Next.js, Preact), attribute names can't contain dots, so set dotted attributes
+  such as `line_items.0.amount` with `setAttribute` in an effect.
+
+  <Fragment slot="code">
+    <Tabs>
+      <TabItem label="SvelteKit">
+        ```svelte
+        <script>
+          import { onMount } from 'svelte';
+
+          let { token, order } = $props();
+
+          onMount(async () => {
+            await import('@ponchopay/pp-browser');
+          });
+        </script>
+
+        <pp-payment {token} urn="INTTEST" amount={order.total} metadata={order.id} email={order.email}>
+          Pay now
+        </pp-payment>
+        ```
+
+        Or make the route non-SSR with [`export const ssr = false;`](https://svelte.dev/docs/kit/page-options#ssr) in its `+page.js`.
+      </TabItem>
+      <TabItem label="React / Next.js">
+        ```tsx
+        'use client';
+        import { useEffect, useRef } from 'react';
+
+        export function PayButton({ token, order }) {
+          const ref = useRef<HTMLElement>(null);
+
+          useEffect(() => {
+            import('@ponchopay/pp-browser');
+          }, []);
+
+          useEffect(() => {
+            const button = ref.current;
+            if (!button) return;
+            // Remove the previous basket's line items, or removed items would still be sent
+            for (const name of button.getAttributeNames()) {
+              if (name.startsWith('line_items.')) button.removeAttribute(name);
+            }
+            // JSX can't write dotted attribute names
+            order.items.forEach((item, i) => {
+              button.setAttribute(`line_items.${i}.description`, item.name);
+              button.setAttribute(`line_items.${i}.amount`, String(item.pricePence));
+              button.setAttribute(`line_items.${i}.quantity`, String(item.quantity));
+            });
+          }, [order]);
+
+          return (
+            <pp-payment ref={ref} token={token} urn="INTTEST" amount={String(order.total)}
+              metadata={order.id} email={order.email}>Pay now</pp-payment>
+          );
+        }
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>
+
+## Develop the SDK
+
+<ApiColumns>
+  To work on the SDK itself, clone its repository and use these commands. Most tool configuration lives in `package.json`. `npm run start` starts a development server and opens `example/index.html`, which has examples of both components.
+
+  <Fragment slot="code">
+    ```bash
+    npm run lint     # check linting and formatting
+    npm run format   # fix linting and formatting
+    npm run test     # run the tests
+    npm run start    # open the example pages with vite
+    ```
+  </Fragment>
+</ApiColumns>

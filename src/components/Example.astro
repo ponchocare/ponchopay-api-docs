@@ -1,0 +1,26 @@
+---
+/**
+ * Example body built from the object definitions in src/data/schemas.ts.
+ *
+ * <Example schema="PaymentCallback" title="Example body" />
+ * <Example schema="InitiatePayment" include={['line_items']} overrides={{ amount: 4000 }} />
+ * <Example schema="PaymentCallback" overrides={{ 'payment.refunded_amount': 1000 }} />
+ * <Example schema="LineItem" complete />
+ * <Example schema="RedirectBody" format="form" />
+ */
+import { Code } from '@astrojs/starlight/components';
+import { buildExample, toFormBody, type ExampleOptions } from '../lib/examples';
+
+interface Props extends ExampleOptions {
+  schema: string;
+  title?: string;
+  /** "json" (default) or "form" for application/x-www-form-urlencoded bodies. */
+  format?: 'json' | 'form';
+}
+
+const { schema, title, complete, include, overrides, format = 'json' } = Astro.props;
+const example = buildExample(schema, { complete, include, overrides });
+const code = format === 'form' ? toFormBody(example) : JSON.stringify(example, null, 2);
+---
+
+<Code code={code} lang={format === 'form' ? 'txt' : 'json'} title={title} />

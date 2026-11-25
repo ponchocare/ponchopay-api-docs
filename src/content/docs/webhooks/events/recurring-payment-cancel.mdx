@@ -1,0 +1,64 @@
+---
+title: Recurring payment cancel
+description: "The recurring_payment_cancel webhook. Sent when a recurring payment is cancelled and will take no more payments."
+tableOfContents: false
+sidebar:
+  order: 10
+---
+
+{/* Generated from one template; keep the structure the same across event pages. */}
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import Event from '../../../../components/Event.astro';
+import ApiColumns from '../../../../components/ApiColumns.astro';
+import Fields from '../../../../components/Fields.astro';
+import Example from '../../../../components/Example.astro';
+import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  Sent when a recurring payment has been cancelled in the admin, or through
+  [Cancel a subscription](/endpoints/cancel-subscription/). Once cancelled, it no longer generates
+  payments.
+
+  Note the event name: `recurring_payment_cancel`, not `recurring_payment_cancelled`.
+
+  <Fragment slot="code">
+    <Event name="recurring_payment_cancel" setting="Recurring payment cancelled" />
+  </Fragment>
+</ApiColumns>
+
+## The event
+
+<ApiColumns>
+  PonchoPay sends a `POST` with the [standard headers](/webhooks/overview/#request-format) and a
+  [SubscriptionCallback](/objects/subscription-callback/) body, with `event` set to `recurring_payment_cancel`:
+
+  <Fields schema="SubscriptionCallback" />
+
+  <Fragment slot="code">
+    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_cancel', id: '0d1e2f3a-4b5c-4d6e-7f8a-9b0c1d2e3f40', date: '2027-03-15T08:45:00.000Z', 'request.metadata': 'membership-2291', 'subscription.payment_methods.0.amount': 8500, 'subscription.payment_methods.0.id': 'b7d9f1a3-4c6e-4a8b-9d0f-3e5a7c9b1d42' }} />
+    The values are examples. `request.metadata` is the `metadata` you sent when you created the
+    recurring payment.
+  </Fragment>
+</ApiColumns>
+
+## Handle the webhook
+
+<WebhookHandler />
+
+## Test it
+
+<ApiColumns>
+  On the demo environment, set up a recurring payment, then call
+  [Cancel a subscription](/endpoints/cancel-subscription/) or cancel it in the admin.
+
+  See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Webhooks overview"
+      description="How this event fits into the payment lifecycle, and every other event."
+      href="/webhooks/overview/"
+    />
+  </Fragment>
+</ApiColumns>

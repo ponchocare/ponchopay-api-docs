@@ -1,0 +1,278 @@
+---
+title: PHP SDK
+description: Take payments, set up recurring payments and manage payments from PHP with ponchopay/pp-php.
+tableOfContents: false
+sidebar:
+  label: PHP
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+import WebhookHandler from '../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  [`ponchopay/pp-php`](https://github.com/ponchocare/pp-php) wraps the PonchoPay API for PHP. It
+  computes [tokens and JWTs](/getting-started/authentication/) for you, creates payments and
+  recurring payments, verifies webhooks, and updates, refunds and cancels payments.
+
+  It needs **PHP 8.2 or later**, and installs `symfony/http-client` (7.4 on PHP 8.2 and 8.3, 8.x on
+  PHP 8.4 and later), `firebase/php-jwt` and `psr/http-message`.
+
+  <Fragment slot="code">
+    ```bash title="Install"
+    composer require ponchopay/pp-php
+    ```
+
+    ```php
+    <?php
+
+    use PonchoPay\Client;
+    use function PonchoPay\createToken;
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Set up the client
+
+<ApiColumns>
+  Create a `Client` with your integration key. It talks to production unless you pass another base
+  URL, so pass the demo URL while you build.
+
+  Keep the key in an environment variable, and use your demo key with the demo URL and your
+  production key with production.
+
+  <Fragment slot="code">
+    ```php
+    <?php
+
+    use PonchoPay\Client;
+
+    $client = new Client(
+        getenv('PONCHOPAY_INTEGRATION_KEY'),
+        getenv('PONCHOPAY_BASE_URL') ?: 'https://demo.ponchopay.com/',
+    );
+    // Production: 'https://pay.ponchopay.com/' (the default)
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Take a payment
+
+<ApiColumns>
+  `$client->initiatePayment()` creates a payment and returns the checkout URL. Redirect the parent
+  there. It calls [Initiate a payment](/endpoints/initiate-payment/) and computes the `token` for
+  you, so pass every parameter except `token`, as an array. Nested objects are associative arrays.
+  `expiry` can be a `DateTimeInterface` or an ISO 8601 string.
+
+  <Fields schema="InitiatePayment" omit={['token']} />
+
+  After checkout, PonchoPay sends [webhooks](#handle-webhooks) and redirects the parent to your
+  [Payment completed](/redirects/payment-completed/) URL.
+
+  <Fragment slot="code">
+    ```php title="checkout.php"
+    <?php
+
+    $order = getOrder($_POST['order_id']);
+
+    $checkoutUrl = $client->initiatePayment([
+        'urn' => $order->locationUrn,      // e.g. 'INTTEST' on demo
+        'amount' => $order->totalPence,    // 1256 is £12.56
+        'metadata' => $order->id,          // comes back in every webhook
+        'email' => $order->parentEmail,
+        'line_items' => array_map(fn ($item) => [
+            'description' => $item->name,
+            'amount' => $item->pricePence,
+            'quantity' => $item->quantity,
+        ], $order->items),
+    ]);
+
+    header('Location: ' . $checkoutUrl, true, 303);
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Set up a recurring payment
+
+<ApiColumns>
+  `$client->initiateSubscription()` creates a recurring payment and returns the URL where the parent
+  sets it up. It calls [Initiate a subscription](/endpoints/initiate-subscription/) and computes the
+  `token`. Dates can be `DateTimeInterface` objects. Pass `weekdays` as an array of strings such as
+  `'monday'`.
+
+  <Fields schema="InitiateSubscription" omit={['token']} />
+
+  <Fragment slot="code">
+    ```php title="Monthly membership"
+    <?php
+
+    $setUpUrl = $client->initiateSubscription([
+        'urn' => 'INTTEST',
+        'amount' => 8500, // £85.00 a month
+        'metadata' => 'membership-2291',
+        'email' => 'parent@example.com',
+        'repetition' => ['granularity' => 'month', 'period' => 1, 'day' => 1],
+        'ending' => ['condition' => 'occurrences', 'occurrences' => 12],
+        'additional_one_time_payment' => [
+            'amount' => 2500, // registration fee, paid first
+            'metadata' => 'membership-2291-registration',
+        ],
+    ]);
+    ```
+
+    ```php title="Every Monday and Thursday"
+    <?php
+
+    $repetition = [
+        'granularity' => 'week',
+        'period' => 1,
+        'weekdays' => ['monday', 'thursday'],
+    ];
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Handle webhooks
+
+`$client->parseCallback($signature, $payload)` checks the `signature` header against the raw body
+and returns the parsed body as an object. `$client->parseRequest($request)` does the same from a
+PSR-7 request. Both throw `PonchoPayException` if the header is missing, the signature doesn't
+match or the body isn't a JSON object, and accept bodies up to 2 MiB. `isValidCallback()` and
+`isValidRequest()` return `true` or `false` instead. See the PHP tab below.
+
+<WebhookHandler />
+
+## Manage payments
+
+<ApiColumns>
+  These methods use a [management JWT](/getting-started/authentication/#management-jwt), which the
+  SDK builds from the `urn` and `email` in the array you pass. `email` records who made the change
+  and doesn't need to be a PonchoPay user.
+
+  - `validateLocationUrn()` checks a location can take payments and returns an object. See
+    [Validate location](/endpoints/validate-location/).
+  - `updatePaymentMethod()` changes one payment method's amount or type. `type` is `card`,
+    `childcare-voucher` or `tax-free-childcare`, which differ from the webhook names. See
+    [Update a payment method](/endpoints/update-payment-method/).
+  - `refundPaymentMethod()` fully or partially refunds a card payment method of a payment, or a Tax-Free Childcare or voucher payment method charged to the parent's card through the payment guarantee. `amount`
+    can't be more than what's left to refund on that payment method. Recurring payments can't be
+    refunded: refund the payments they generate. See
+    [Refund a payment method](/endpoints/refund-payment-method/).
+  - `cancelPayment()` and `cancelRecursion()` cancel a payment or recurring payment. See
+    [Cancel a payment](/endpoints/cancel-payment/) and
+    [Cancel a subscription](/endpoints/cancel-subscription/).
+
+  Take payment and payment method IDs from your webhooks: `payment.id`,
+  `payment.payment_methods[].id` and `subscription.id`.
+
+  <Fragment slot="code">
+    ```php
+    <?php
+
+    $who = ['urn' => 'INTTEST', 'email' => 'admin@club.example.com'];
+
+    $status = $client->validateLocationUrn($who);
+    if (!$status->verification_status) {
+        // Ask the provider to finish verification in PonchoPay
+    }
+
+    $client->updatePaymentMethod($paymentMethodId, [...$who,
+        'type' => 'childcare-voucher',
+        'amount' => 4274,
+        'voucher_provider' => 'cooperating_helping_4ever',
+    ]);
+
+    $client->refundPaymentMethod($paymentMethodId, [...$who, 'amount' => 1000]);
+
+    $client->cancelPayment($paymentId, $who);
+    $client->cancelRecursion($subscriptionId, $who);
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Errors
+
+<ApiColumns>
+  If PonchoPay responds with an unexpected status, the method throws a
+  `PonchoPay\PonchoPayException` whose message starts with `[PonchoPay]` and includes the status
+  code. For example, a rejected payment throws
+  `[PonchoPay] Unexpected response. Expected 302 as status code but 400 was received`.
+
+  The message doesn't include PonchoPay's response body: to see the reason for a `400`, check the
+  inputs against the endpoint's list of common errors, or call the endpoint directly.
+
+  Network problems surface as Symfony HTTP client exceptions.
+
+  `Client` implements `PonchoPay\ClientInterface`, so you can depend on the interface and swap in
+  a fake in your tests. `PonchoPay\Types` defines phpstan types for the payloads and responses,
+  such as `PaymentInit` and `PaymentWebhook`, to import with `@phpstan-import-type`.
+
+  <Fragment slot="code">
+    ```php
+    <?php
+
+    use PonchoPay\PonchoPayException;
+
+    try {
+        $checkoutUrl = $client->initiatePayment($init);
+        header('Location: ' . $checkoutUrl, true, 303);
+    } catch (PonchoPayException $e) {
+        error_log('PonchoPay rejected the payment: ' . $e->getMessage());
+        http_response_code(502);
+        echo 'Payment could not be started';
+    }
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Reference
+
+<ApiColumns>
+  | Function or method | Returns | API |
+  | --- | --- | --- |
+  | `new Client(string $key, string $base = 'https://pay.ponchopay.com/')` | A client | |
+  | `$client->initiatePayment(array $init)` | `string`: checkout URL | [Initiate a payment](/endpoints/initiate-payment/) |
+  | `$client->initiateSubscription(array $init)` | `string`: set-up URL | [Initiate a subscription](/endpoints/initiate-subscription/) |
+  | `$client->validateLocationUrn(['urn' => …, 'email' => …])` | `object` with `verification_status`, `card_payments_enabled`, `childcare_voucher_payments_enabled`, `tax_free_childcare_payments_enabled` | [Validate location](/endpoints/validate-location/) |
+  | `$client->updatePaymentMethod(string $paymentMethodId, array $update)` | `void` | [Update a payment method](/endpoints/update-payment-method/) |
+  | `$client->refundPaymentMethod(string $paymentMethodId, array $refund)` | `void` | [Refund a payment method](/endpoints/refund-payment-method/) |
+  | `$client->cancelPayment(string $paymentId, array $payload)` | `void` | [Cancel a payment](/endpoints/cancel-payment/) |
+  | `$client->cancelRecursion(string $recursionId, array $payload)` | `void` | [Cancel a subscription](/endpoints/cancel-subscription/) |
+  | `$client->parseCallback(string $signature, StreamInterface\|string $payload)` | `object`: the webhook body, after checking it comes from PonchoPay. Throws if it doesn't | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `$client->parseRequest(RequestInterface $request)` | The same, from a PSR-7 request | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `$client->isValidCallback(string $signature, StreamInterface\|string $payload)` | `bool`: whether the webhook comes from PonchoPay and hasn't been tampered with | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `$client->isValidRequest(RequestInterface $request)` | The same, from a PSR-7 request | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `PonchoPay\createToken(string $key, string $metadata)` | `string`: initiation token | [Initiation token](/getting-started/authentication/#initiation-token) |
+  | `PonchoPay\createJWT(string $urn, string $key, string $email, string $data)` | `string`: management JWT, valid for 5 seconds. `$data` is the body to be sent (`''` when there's none) | [Management JWT](/getting-started/authentication/#management-jwt) |
+
+  Parameter types:
+
+  - `$init`: the [Initiate a payment](/endpoints/initiate-payment/) or
+    [Initiate a subscription](/endpoints/initiate-subscription/) parameters without `token`, as an
+    associative array.
+  - `$payload`: `['urn' => string, 'email' => string]`. `urn` is the location's Unique Reference
+    Number. `email` is who authored the request, and doesn't need to be a PonchoPay user.
+  - `$update`: `$payload` plus the [Update a payment method](/endpoints/update-payment-method/) body.
+  - `$refund`: `$payload` plus `amount`, as in
+    [Refund a payment method](/endpoints/refund-payment-method/).
+
+  <Aside title="Telemetry">
+    Every request includes an `x-telemetry` header with the SDK's name and version and your PHP
+    version, operating system and architecture. It contains no personal or payment data.
+  </Aside>
+</ApiColumns>
+
+## Develop the SDK
+
+<ApiColumns>
+  To work on the SDK itself, clone its repository and use these commands.
+
+  <Fragment slot="code">
+    ```bash
+    composer exec php-cs-fixer fix .   # fix linting and formatting
+    composer exec phpunit tests/       # run the tests
+    ```
+  </Fragment>
+</ApiColumns>

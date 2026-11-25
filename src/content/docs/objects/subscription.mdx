@@ -1,0 +1,15 @@
+---
+title: Subscription
+description: A recurring payment as it appears in webhooks.
+---
+
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+A recurring payment (subscription) as it appears in [recurring payment webhooks](/objects/subscription-callback/). Amounts are in pence.
+
+<Fields schema="Subscription" />
+
+## Example
+
+<Example schema="Subscription" overrides={{ 'payment_methods.0.amount': 8500, 'payment_methods.0.id': 'b7d9f1a3-4c6e-4a8b-9d0f-3e5a7c9b1d42' }} />

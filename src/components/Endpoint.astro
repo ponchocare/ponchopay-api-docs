@@ -1,0 +1,94 @@
+---
+/**
+ * Endpoint header: HTTP method plus the full URL for each environment.
+ *
+ * <Endpoint method="POST" path="/api/integration/generic/initiate" />
+ */
+interface Props {
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  path: string;
+}
+
+const { method, path } = Astro.props;
+// The documented base URLs end in /api/, so show the path relative to them.
+const relativePath = path.replace(/^\/api(?=\/)/, '');
+const environments = [
+  { name: 'Production', base: 'https://pay.ponchopay.com' },
+  { name: 'Demo', base: 'https://demo.ponchopay.com' },
+];
+---
+
+<div class="pp-endpoint not-content">
+  <div class="pp-endpoint__line">
+    <span class={`pp-method pp-method--${method.toLowerCase()}`}>{method}</span>
+    <code class="pp-endpoint__path">{relativePath}</code>
+  </div>
+  <dl class="pp-endpoint__envs">
+    {
+      environments.map(({ name, base }) => (
+        <div>
+          <dt>{name}</dt>
+          <dd>
+            <code>{base + path}</code>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</div>
+
+<style>
+  .pp-endpoint {
+    margin-block: 1.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--pp-radius-button);
+    background-color: var(--pp-surface-card);
+    box-shadow: inset 0 0 0 2px var(--pp-outline), 8px 8px 0 0 var(--pp-ink);
+  }
+  .pp-endpoint__line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .pp-endpoint__path {
+    font-size: var(--sl-text-lg);
+    font-weight: 600;
+    color: var(--sl-color-white);
+    background: none;
+    padding: 0;
+    overflow-wrap: anywhere;
+  }
+  .pp-endpoint__envs {
+    margin: 0.75rem 0 0;
+    display: grid;
+    gap: 0.25rem;
+    font-size: var(--sl-text-sm);
+  }
+  .pp-endpoint__envs div {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0.5rem;
+  }
+  .pp-endpoint__envs dt {
+    color: var(--sl-color-gray-3);
+  }
+  .pp-endpoint__envs dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .pp-endpoint__envs code {
+    background: none;
+    padding: 0;
+    font-size: 0.8125rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  @media (max-width: 30rem) {
+    .pp-endpoint__envs div {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>
+

@@ -1,0 +1,69 @@
+---
+title: Recurring payment captured
+description: "The recurring_payment_captured webhook. Sent when the parent completes the card pre-authorisation for a recurring payment (for Tax-Free Childcare and vouchers, not if payment guarantee is turned off)."
+tableOfContents: false
+sidebar:
+  order: 8
+---
+
+{/* Generated from one template; keep the structure the same across event pages. */}
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import Event from '../../../../components/Event.astro';
+import ApiColumns from '../../../../components/ApiColumns.astro';
+import Fields from '../../../../components/Fields.astro';
+import Example from '../../../../components/Example.astro';
+import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  Sent when the parent completes the card pre-authorisation for a recurring payment: its payment
+  details have been captured.
+
+  - **Card recurring payments**: sent just before
+    [`recurring_payment_set_up`](/webhooks/events/recurring-payment-set-up/).
+  - **Tax-Free Childcare or voucher recurring payments**: from this point the payments it generates
+    can be guaranteed, if the payment guarantee option is selected in your settings. Not sent if
+    payment guarantee is turned off.
+
+  <Fragment slot="code">
+    <Event name="recurring_payment_captured" setting="Recurring payment captured" />
+  </Fragment>
+</ApiColumns>
+
+## The event
+
+<ApiColumns>
+  PonchoPay sends a `POST` with the [standard headers](/webhooks/overview/#request-format) and a
+  [SubscriptionCallback](/objects/subscription-callback/) body, with `event` set to `recurring_payment_captured`:
+
+  <Fields schema="SubscriptionCallback" />
+
+  <Fragment slot="code">
+    <Example schema="SubscriptionCallback" title="Example body" overrides={{ event: 'recurring_payment_captured', id: '8b9c0d1e-2f3a-4b4c-5d6e-7f8a9b0c1d28', date: '2026-11-24T10:14:05.000Z', 'subscription.payment_methods.0.amount': 8500, 'subscription.payment_methods.0.id': '5e7a9c1b-3d5f-4a8c-9e0b-1c3e5a7b9d64', 'subscription.id': '9c1e3a5b-7d9f-4b2c-8e4a-6f8b0d2c4e57', 'subscription.reference': 'PR-2K8v4N', 'request.metadata': 'membership-2292', 'subscription.payment_methods.0.type': 'tax_free_childcare', 'subscription.payment_methods.0.variant': 'manual' }} />
+    The values are examples. `request.metadata` is the `metadata` you sent when you created the
+    recurring payment.
+  </Fragment>
+</ApiColumns>
+
+## Handle the webhook
+
+<WebhookHandler />
+
+## Test it
+
+<ApiColumns>
+  On the demo environment, with payment guarantee turned on in your settings,
+  [initiate a subscription](/endpoints/initiate-subscription/), choose Tax-Free Childcare or
+  vouchers, and complete the card pre-authorisation with a
+  [test card](/getting-started/testing/#test-cards).
+
+  See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Webhooks overview"
+      description="How this event fits into the payment lifecycle, and every other event."
+      href="/webhooks/overview/"
+    />
+  </Fragment>
+</ApiColumns>

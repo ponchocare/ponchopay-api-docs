@@ -1,0 +1,15 @@
+---
+title: PaymentMethod
+description: One payment method of a payment or recurring payment, as it appears in webhooks.
+---
+
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+One payment method of a [Payment](/objects/payment/) or [Subscription](/objects/subscription/). A split payment has one entry per method. Amounts are in pence.
+
+<Fields schema="PaymentMethod" />
+
+## Example
+
+<Example schema="PaymentMethod" complete />

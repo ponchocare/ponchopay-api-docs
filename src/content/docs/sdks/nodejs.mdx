@@ -1,0 +1,344 @@
+---
+title: Node.js SDK
+description: Take payments, set up recurring payments, verify webhooks and manage payments from Node.js with @ponchopay/pp-nodejs.
+tableOfContents: false
+sidebar:
+  label: Node.js
+  order: 1
+---
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+
+<ApiColumns>
+  [`@ponchopay/pp-nodejs`](https://github.com/ponchocare/pp-nodejs) wraps the PonchoPay API for
+  Node.js. It computes [tokens and JWTs](/getting-started/authentication/) for you, creates
+  payments and recurring payments, verifies webhooks, and updates, refunds and cancels payments.
+
+  - It's an ES module: load it with `import`, not `require`.
+  - It's written in TypeScript and ships its types.
+  - Use it on your server only. It needs your integration key.
+
+  <Fragment slot="code">
+    ```bash title="Install"
+    npm install @ponchopay/pp-nodejs
+    ```
+
+    You can also use your favourite package manager, such as `yarn add` or `pnpm add`.
+
+    ```ts
+    import { Client, createToken } from '@ponchopay/pp-nodejs';
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Set up the client
+
+<ApiColumns>
+  Create a `Client` with your integration key. It talks to production unless you pass another base
+  URL, so pass the demo URL while you build.
+
+  Keep the key in an environment variable, and use your demo key with the demo URL and your
+  production key with production.
+
+  <Fragment slot="code">
+    ```ts
+    import { Client } from '@ponchopay/pp-nodejs';
+
+    const client = new Client(
+      process.env.PONCHOPAY_INTEGRATION_KEY,
+      process.env.PONCHOPAY_BASE_URL ?? 'https://demo.ponchopay.com/',
+    );
+    // Production: 'https://pay.ponchopay.com/' (the default)
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Take a payment
+
+<ApiColumns>
+  `client.initiatePayment()` creates a payment and resolves to the checkout URL. Redirect the parent
+  there. It calls [Initiate a payment](/endpoints/initiate-payment/) and computes the `token` for
+  you, so pass every parameter except `token`. `expiry` can be a `Date` or an ISO 8601 string.
+
+  The parameter types shown are the API's. In the SDK, `integer` fields (amounts, `quantity`, `period`, `day`, `occurrences`) are `number`s, dates (`expiry`, `ending.date`) can be a `Date` object or an ISO 8601 string, and `weekdays` is a `Set` of `Weekday` values.
+
+  <Fields schema="InitiatePayment" omit={['token']} />
+
+  After checkout, PonchoPay sends [webhooks](#handle-webhooks) and redirects the parent to your
+  [Payment completed](/redirects/payment-completed/) URL.
+
+  <Fragment slot="code">
+    ```ts title="Express route"
+    app.post('/checkout/:orderId', async (req, res) => {
+      const order = await getOrder(req.params.orderId);
+
+      const checkoutUrl = await client.initiatePayment({
+        urn: order.locationUrn,       // e.g. 'INTTEST' on demo
+        amount: order.totalPence,     // 1256 is £12.56
+        metadata: order.id,           // comes back in every webhook
+        email: order.parentEmail,
+        line_items: order.items.map((item) => ({
+          description: item.name,
+          amount: item.pricePence,
+          quantity: item.quantity,
+        })),
+      });
+
+      res.redirect(303, checkoutUrl);
+    });
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Set up a recurring payment
+
+<ApiColumns>
+  `client.initiateSubscription()` creates a recurring payment and resolves to the URL where the
+  parent sets it up. It calls [Initiate a subscription](/endpoints/initiate-subscription/) and
+  computes the `token`. Dates can be `Date` objects. For weekly repetitions, pass `weekdays` as a
+  `Set` of the exported `Weekday` values.
+
+  The parameter types shown are the API's. In the SDK, `integer` fields (amounts, `quantity`, `period`, `day`, `occurrences`) are `number`s, dates (`expiry`, `ending.date`) can be a `Date` object or an ISO 8601 string, and `weekdays` is a `Set` of `Weekday` values.
+
+  <Fields schema="InitiateSubscription" omit={['token']} />
+
+  <Fragment slot="code">
+    ```ts title="Monthly membership"
+    const setUpUrl = await client.initiateSubscription({
+      urn: 'INTTEST',
+      amount: 8500, // £85.00 a month
+      metadata: 'membership-2291',
+      email: 'parent@example.com',
+      repetition: { granularity: 'month', period: 1, day: 1 },
+      ending: { condition: 'occurrences', occurrences: 12 },
+      additional_one_time_payment: {
+        amount: 2500, // registration fee, paid first
+        metadata: 'membership-2291-registration',
+      },
+    });
+    ```
+
+    ```ts title="Every Monday and Thursday"
+    import { Weekday } from '@ponchopay/pp-nodejs';
+
+    const repetition = {
+      granularity: 'week',
+      period: 1,
+      weekdays: new Set([Weekday.Monday, Weekday.Thursday]),
+    } as const;
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Handle webhooks
+
+<ApiColumns>
+  The client checks a webhook's `signature` header with your integration key. Use the method that
+  matches what your framework gives you:
+
+  - **A Fetch API [`Request`](https://developer.mozilla.org/docs/Web/API/Request)** (Next.js route
+    handlers, Remix, Hono, Workers…): `client.parseRequest(request)` resolves to the parsed body.
+    It reads a clone, so you can still read the body yourself afterwards.
+  - **The raw body and the header** (Express, Fastify…): `client.parseCallback(signature, payload)`
+    returns the parsed body. Pass the body exactly as received, not re-serialised JSON.
+
+  Both throw a `[PonchoPay]` error if the header is missing, the signature doesn't match or the body
+  isn't a JSON object. `client.isValidRequest(request)` and `client.isValidCallback(signature,
+  payload)` return `true` or `false` instead, without parsing.
+
+  The body is a [PaymentCallback](/objects/payment-callback/) or, for recurring payments, a
+  [SubscriptionCallback](/objects/subscription-callback/). The SDK doesn't export a type for it, so
+  pass your own as the type argument. Skip events whose `id` you've already handled.
+
+  Before you fulfil an order, check that `payment.amount` is what you expect. With
+  [browser checkout](/sdks/browser/), the token only signs `metadata`, so the parent can change the
+  amount before paying.
+
+  <Fragment slot="code">
+    ```ts title="app/webhooks/ponchopay/route.ts (Next.js)"
+    import { Client } from '@ponchopay/pp-nodejs';
+
+    const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY!);
+
+    // The fields this handler reads. See PaymentCallback for the rest.
+    type PaymentEvent = {
+      id: string;
+      event: string;
+      payment: { amount: number; refunded_amount: number };
+      request: { metadata: string };
+    };
+
+    export async function POST(request: Request) {
+      let event: PaymentEvent;
+      try {
+        event = await client.parseRequest<PaymentEvent>(request);
+      } catch {
+        return new Response('Invalid signature', { status: 401 });
+      }
+
+      if (!(await alreadyHandled(event.id))) {
+        const order = await findOrder(event.request.metadata);
+        switch (event.event) {
+          case 'payment_completed':
+            if (event.payment.amount === order.totalPence) {
+              await markOrderPaid(order);
+            } else {
+              await flagForReview(order, event);
+            }
+            break;
+          case 'payment_refunded':
+            await recordRefund(order, event.payment.refunded_amount);
+            break;
+        }
+      }
+      return new Response(null, { status: 204 });
+    }
+    ```
+
+    ```ts title="Express: the raw body and the header"
+    // express.raw keeps the body as bytes, so the signature can be checked.
+    app.post('/webhooks/ponchopay', express.raw({ type: 'application/json' }), (req, res) => {
+      let event: PaymentEvent;
+      try {
+        event = client.parseCallback<PaymentEvent>(req.get('signature') ?? '', req.body.toString('utf8'));
+      } catch {
+        return res.status(401).send('Invalid signature');
+      }
+      // …handle it as above
+      res.sendStatus(204);
+    });
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Manage payments
+
+<ApiColumns>
+  These methods use a [management JWT](/getting-started/authentication/#management-jwt), which the
+  SDK builds from the `urn` and `email` you pass. `email` records who made the change and doesn't
+  need to be a PonchoPay user.
+
+  - `validateLocationUrn()` checks a location can take payments. See
+    [Validate location](/endpoints/validate-location/).
+  - `updatePaymentMethod()` changes one payment method's amount or type. Use the exported
+    `PaymentMethodType` values (`card`, `childcare-voucher`, `tax-free-childcare`), which differ
+    from the webhook names. See [Update a payment method](/endpoints/update-payment-method/).
+  - `refundPaymentMethod()` fully or partially refunds a card payment method of a payment, or a Tax-Free Childcare or voucher payment method charged to the parent's card through the payment guarantee. `amount`
+    can't be more than what's left to refund on that payment method. Recurring payments can't be
+    refunded: refund the payments they generate. See
+    [Refund a payment method](/endpoints/refund-payment-method/).
+  - `cancelPayment()` and `cancelRecursion()` cancel a payment or recurring payment. See
+    [Cancel a payment](/endpoints/cancel-payment/) and
+    [Cancel a subscription](/endpoints/cancel-subscription/).
+
+  Take payment and payment method IDs from your webhooks: `payment.id`,
+  `payment.payment_methods[].id` and `subscription.id`.
+
+  <Fragment slot="code">
+    ```ts
+    import { PaymentMethodType } from '@ponchopay/pp-nodejs';
+
+    const who = { urn: 'INTTEST', email: 'admin@club.example.com' };
+
+    const status = await client.validateLocationUrn(who);
+    // { verification_status, card_payments_enabled, … }
+
+    await client.updatePaymentMethod(paymentMethodId, {
+      ...who,
+      type: PaymentMethodType.ChildcareVouchers,
+      amount: 4274,
+      voucher_provider: 'cooperating_helping_4ever',
+    });
+
+    await client.refundPaymentMethod(paymentMethodId, { ...who, amount: 1000 });
+
+    await client.cancelPayment(paymentId, who);
+    await client.cancelRecursion(subscriptionId, who);
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Errors
+
+<ApiColumns>
+  If PonchoPay responds with an unexpected status, the method throws an `Error` whose message starts
+  with `[PonchoPay]` and includes the status code. For example, a rejected payment throws
+  `[PonchoPay] Unexpected response. Expected 302 as status code but 400 was received.`
+
+  The error class isn't exported, so check the message. It doesn't include PonchoPay's response
+  body: to see the reason for a `400`, check the inputs against the endpoint's list of common
+  errors, or call the endpoint directly.
+
+  Network errors are thrown as they are.
+
+  <Fragment slot="code">
+    ```ts
+    try {
+      const checkoutUrl = await client.initiatePayment(init);
+      res.redirect(303, checkoutUrl);
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('[PonchoPay]')) {
+        logger.warn('PonchoPay rejected the payment', { error: error.message, init });
+        return res.status(502).send('Payment could not be started');
+      }
+      throw error;
+    }
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Reference
+
+<ApiColumns>
+  | Declaration | Returns | API |
+  | --- | --- | --- |
+  | `new Client(key: string, base?: string)` | A client. `base` defaults to `https://pay.ponchopay.com/` | |
+  | `client.initiatePayment(init: PaymentInit): Promise<string>` | The payment URL the parent must follow to complete the payment | [Initiate a payment](/endpoints/initiate-payment/) |
+  | `client.initiateSubscription(init: SubscriptionInit): Promise<string>` | The URL the parent must follow to set up the recurring payment | [Initiate a subscription](/endpoints/initiate-subscription/) |
+  | `client.validateLocationUrn(payload: JWTPayload): Promise<object>` | `{ verification_status, card_payments_enabled, childcare_voucher_payments_enabled, tax_free_childcare_payments_enabled }` | [Validate location](/endpoints/validate-location/) |
+  | `client.updatePaymentMethod(paymentMethodId: string, update: PaymentMethodUpdate): Promise<void>` | Nothing. Await the promise | [Update a payment method](/endpoints/update-payment-method/) |
+  | `client.refundPaymentMethod(paymentMethodId: string, refund: PaymentMethodRefund): Promise<void>` | Nothing. Await the promise | [Refund a payment method](/endpoints/refund-payment-method/) |
+  | `client.cancelPayment(paymentId: string, payload: JWTPayload): Promise<void>` | Nothing. Await the promise | [Cancel a payment](/endpoints/cancel-payment/) |
+  | `client.cancelRecursion(recursionId: string, payload: JWTPayload): Promise<void>` | Nothing. Await the promise | [Cancel a subscription](/endpoints/cancel-subscription/) |
+  | `createToken(key: string, metadata: string): string` | The token for the initiation endpoints | [Initiation token](/getting-started/authentication/#initiation-token) |
+  | `createJWT(urn: string, key: string, email: string, data: string): Promise<string>` | The JWT for the management endpoints, valid for 5 seconds. `data` is the body to be sent | [Management JWT](/getting-started/authentication/#management-jwt) |
+  | `client.parseRequest<T extends object>(request: Request): Promise<T>` | The parsed webhook body, after checking it comes from PonchoPay. Throws if it doesn't | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `client.parseCallback<T extends object>(signature: string, payload: string): T` | The same, from the `signature` header and the raw body | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `client.isValidRequest(request: Request): Promise<boolean>` | Whether the webhook comes from PonchoPay and hasn't been tampered with | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `client.isValidCallback(signature: string, payload: string): boolean` | The same, from the `signature` header and the raw body | [Webhooks](/webhooks/overview/#verify-and-handle-webhooks) |
+  | `Weekday` | Enum: `Monday` … `Sunday` (`'monday'` … `'sunday'`) | [SubscriptionRepetition](/objects/subscription-repetition/) |
+  | `PaymentMethodType` | Enum: `Card`, `ChildcareVouchers`, `TaxFreeChildcare` | [UpdatePaymentMethod](/endpoints/update-payment-method/) |
+
+  Parameter types:
+
+  - `PaymentInit`: the [Initiate a payment](/endpoints/initiate-payment/) parameters without `token`.
+  - `SubscriptionInit`: the [Initiate a subscription](/endpoints/initiate-subscription/) parameters
+    without `token`.
+  - `JWTPayload`: `{ urn: string; email: string }`. `urn` is the location's Unique Reference
+    Number. `email` is who authored the request, and doesn't need to be a PonchoPay user.
+  - `PaymentMethodUpdate`: `JWTPayload` plus the
+    [Update a payment method](/endpoints/update-payment-method/) body.
+  - `PaymentMethodRefund`: `JWTPayload` plus `amount`, as in
+    [Refund a payment method](/endpoints/refund-payment-method/).
+
+  <Aside title="Telemetry">
+    Every request includes an `x-telemetry` header with the SDK's name and version and your Node.js
+    version, platform and architecture. It contains no personal or payment data.
+  </Aside>
+</ApiColumns>
+
+## Develop the SDK
+
+<ApiColumns>
+  To work on the SDK itself, clone its repository and use these commands.
+
+  <Fragment slot="code">
+    ```bash
+    npm run lint     # check linting and formatting
+    npm run format   # fix linting and formatting
+    npm run test     # run the tests
+    ```
+  </Fragment>
+</ApiColumns>

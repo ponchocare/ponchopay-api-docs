@@ -1,0 +1,15 @@
+---
+title: PaymentConstraints
+description: Optional rules for how a payment can be split across payment methods.
+---
+
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+Optional rules for how a payment can be paid. Send it as `constraints` when you [initiate a payment](/endpoints/initiate-payment/), or in a recurring payment's `additional_one_time_payment` when you [initiate a subscription](/endpoints/initiate-subscription/). Leave it out and no constraints apply.
+
+<Fields schema="PaymentConstraints" />
+
+## Example
+
+<Example schema="PaymentConstraints" complete />

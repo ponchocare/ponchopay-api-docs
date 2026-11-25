@@ -1,0 +1,133 @@
+{/*
+  How to verify and handle a webhook. Shared by the webhooks overview and every event page, so the
+  handler code is written once. Import it and render <WebhookHandler />.
+*/}
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import ApiColumns from '../components/ApiColumns.astro';
+
+<ApiColumns>
+  1. Read the body as a raw string. Some libraries parse JSON automatically: parsing it before it's
+     verified is potentially unsafe, and serialising it back into a string can change the bytes so
+     the signature won't match.
+  2. Compute the HMAC-SHA256 of the raw body using your integration key, encoded as URL-safe
+     Base64 without padding ([RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648#section-5)).
+  3. Compare it with the `signature` header, using a constant-time comparison. If the header is
+     missing or they don't match, reject the request.
+  4. Parse the JSON. Skip it if you've already handled its `id`, then act on its `event`. Before
+     you fulfil an order, check `payment.amount` is what you expect: with
+     [browser checkout](/sdks/browser/), the token only signs `metadata`, so the parent can change
+     the amount.
+  5. PonchoPay doesn't expect a response body. Reply quickly with a `2xx` status, and do slow work,
+     such as sending emails, after replying.
+
+  <Aside type="caution" title="Expect duplicates">
+    The same event can reach you more than once, for example when it's manually resent from
+    PonchoPay. A resent event keeps its original `id`, `date` and body, so store the `id`s you've
+    handled and skip repeats rather than overwriting newer data.
+  </Aside>
+
+  The Node.js SDK and the PHP SDK do steps 1 to 3 and the parsing for you. The Python tab shows
+  them by hand.
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        // Fetch API Request: Next.js route handlers, Hono, Remix…
+        import { Client } from '@ponchopay/pp-nodejs';
+
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY!);
+
+        // The fields read here. See PaymentCallback and SubscriptionCallback for the rest.
+        type PonchoPayEvent = { id: string; event: string; request: { metadata: string } };
+
+        export async function POST(request: Request) {
+          let event: PonchoPayEvent;
+          try {
+            // Throws if the signature doesn't match.
+            event = await client.parseRequest<PonchoPayEvent>(request);
+          } catch {
+            return new Response('Invalid signature', { status: 401 });
+          }
+
+          if (!(await alreadyHandled(event.id))) {
+            await handleEvent(event); // switch on event.event
+          }
+          return new Response(null, { status: 204 });
+        }
+        ```
+      </TabItem>
+      <TabItem label="Express">
+        ```js
+        import express from 'express';
+        import { Client } from '@ponchopay/pp-nodejs';
+
+        const app = express();
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+
+        // express.raw keeps the body as bytes so the signature can be checked.
+        app.post('/webhooks/ponchopay', express.raw({ type: 'application/json' }), async (req, res) => {
+          let event;
+          try {
+            // Throws if the header is missing or the signature doesn't match.
+            event = client.parseCallback(req.get('signature') ?? '', req.body.toString('utf8'));
+          } catch {
+            return res.status(401).send('Invalid signature');
+          }
+
+          if (!(await alreadyHandled(event.id))) {
+            await handleEvent(event); // switch on event.event
+          }
+          res.sendStatus(204);
+        });
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use PonchoPay\Client;
+        use PonchoPay\PonchoPayException;
+
+        $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+
+        try {
+            // Throws if the header is missing or the signature doesn't match.
+            $event = $client->parseCallback(
+                $_SERVER['HTTP_SIGNATURE'] ?? '',
+                file_get_contents('php://input'),
+            );
+        } catch (PonchoPayException $e) {
+            http_response_code(401);
+            exit('Invalid signature');
+        }
+
+        if (!alreadyHandled($event->id)) {
+            handleEvent($event); // switch on $event->event
+        }
+        http_response_code(204);
+        ```
+
+        With a PSR-7 request (Slim, or Laravel and Symfony through their PSR-7 bridges), use
+        `$client->parseRequest($request)` instead.
+      </TabItem>
+      <TabItem label="Python">
+        ```python
+        import base64, hashlib, hmac, json, os
+
+        def verify_and_parse(raw_body: bytes, signature: str) -> dict:
+            key = os.environ["PONCHOPAY_INTEGRATION_KEY"].encode("utf-8")
+            digest = hmac.new(key, raw_body, hashlib.sha256).digest()
+            expected = base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
+            if not hmac.compare_digest(expected, signature or ""):
+                raise ValueError("Invalid signature")
+            return json.loads(raw_body)
+
+        # In your web framework: pass the raw request body and the "signature"
+        # header, skip events whose "id" you've handled, then respond 204.
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>

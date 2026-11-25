@@ -1,0 +1,111 @@
+---
+title: Validate location
+description: Check that a location is verified and which payment methods it can take.
+tableOfContents: false
+sidebar:
+  label: Validate location
+  order: 1
+  badge:
+    text: GET
+    variant: note
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Endpoint from '../../../components/Endpoint.astro';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+<ApiColumns>
+  Checks that a location is set up to take payments: whether it's verified, and which payment
+  methods are turned on. Call it when a provider connects their PonchoPay location to your system,
+  so you can show them what's missing before any parent tries to pay.
+
+  <Fragment slot="code">
+    <Endpoint method="GET" path="/api/integration/validate" />
+  </Fragment>
+</ApiColumns>
+
+## Authentication
+
+<ApiColumns>
+  Send a [management JWT](/getting-started/authentication/#management-jwt) in the `Authorization`
+  header. Its `urn` claim is the location to check. There's no body, so `sig` is the hash of an
+  empty string. The SDKs build the token for you.
+
+  <Fragment slot="code">
+    ```http
+    GET /api/integration/validate
+    Authorization: Bearer <jwt>
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Request
+
+<ApiColumns>
+  This endpoint takes no parameters. The location comes from the token's `urn` claim.
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { Client } from '@ponchopay/pp-nodejs';
+
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+        // Demo: new Client(key, 'https://demo.ponchopay.com/')
+
+        const status = await client.validateLocationUrn({
+          urn: 'INTTEST',
+          email: 'admin@club.example.com',
+        });
+
+        if (!status.verification_status) {
+          // Ask the provider to finish verification in PonchoPay
+        }
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use PonchoPay\Client;
+
+        $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+        // Demo: new Client($key, 'https://demo.ponchopay.com/')
+
+        $status = $client->validateLocationUrn([
+            'urn' => 'INTTEST',
+            'email' => 'admin@club.example.com',
+        ]);
+
+        if (!$status->verification_status) {
+            // Ask the provider to finish verification in PonchoPay
+        }
+        ```
+      </TabItem>
+      <TabItem label="cURL">
+        ```bash
+        # $JWT: a management JWT for the location, signed over an empty body
+        curl https://demo.ponchopay.com/api/integration/validate \
+          -H "Authorization: Bearer $JWT"
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>
+
+## Returns
+
+<ApiColumns>
+  **`200 OK`** with a ValidateLocation object:
+
+  <Fields schema="ValidateLocation" />
+
+  **`401 Unauthorized`**: the token is invalid or has expired, or the `urn` isn't one of your
+  locations.
+
+  <Fragment slot="code">
+    <Example schema="ValidateLocation" title="Response" />
+  </Fragment>
+</ApiColumns>

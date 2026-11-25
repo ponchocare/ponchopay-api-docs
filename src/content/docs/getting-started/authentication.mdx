@@ -1,0 +1,208 @@
+---
+title: Authentication
+description: How to sign requests to PonchoPay with your integration key, and how to check that webhooks come from PonchoPay.
+tableOfContents: false
+sidebar:
+  order: 2
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+import { Image } from 'astro:assets';
+import jwtIoCheck from '../../../assets/jwt-io-check.png';
+
+<ApiColumns>
+  Everything is signed with your [integration key](/getting-started/introduction/#set-up-your-account),
+  in one of three ways depending on what you're doing:
+
+  | Used for | How it's signed |
+  | --- | --- |
+  | [Initiate a payment](/endpoints/initiate-payment/) and [Initiate a subscription](/endpoints/initiate-subscription/) | A [`token` field](#initiation-token) in the body |
+  | [Validate location](/endpoints/validate-location/), [update](/endpoints/update-payment-method/), [refund](/endpoints/refund-payment-method/) and cancel endpoints | A [JWT](#management-jwt) in the `Authorization` header |
+  | [Webhooks](/webhooks/overview/) PonchoPay sends you | A [`signature` header](#webhook-signatures) you check |
+
+  The [Node.js](/sdks/nodejs/) and [PHP](/sdks/php/) SDKs create tokens and JWTs for you, and the
+  Node.js SDK also verifies webhooks.
+
+  <Aside type="danger" title="Keep your integration key on your server">
+    Compute tokens on your server. Never put the integration key in browser code, a mobile app or a
+    public repository.
+  </Aside>
+</ApiColumns>
+
+## Initiation token
+
+<ApiColumns>
+  Requests that create a payment or recurring payment include a `token` field, computed from your
+  integration key and the request's `metadata`:
+
+  ```txt
+  token = base64( sha256( metadata + "." + integrationKey ) )
+  ```
+
+  - `sha256` gives the raw digest (bytes, not hex).
+  - `base64` is standard Base64, with padding.
+  - The token changes with `metadata`, so compute one for each request.
+
+  These requests can come from the browser (a form or the `<pp-payment>` web component). Compute
+  the token on your server and render it into the page.
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { createToken } from '@ponchopay/pp-nodejs';
+
+        const integrationKey = process.env.PONCHOPAY_INTEGRATION_KEY;
+        const token = createToken(integrationKey, 'order-67651');
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use function PonchoPay\createToken;
+
+        $integrationKey = getenv('PONCHOPAY_INTEGRATION_KEY');
+        $token = createToken($integrationKey, 'order-67651');
+        ```
+      </TabItem>
+      <TabItem label="Python">
+        ```python
+        import base64, hashlib, os
+
+        key = os.environ["PONCHOPAY_INTEGRATION_KEY"]
+        metadata = "order-67651"
+        digest = hashlib.sha256(f"{metadata}.{key}".encode("utf-8")).digest()
+        token = base64.b64encode(digest).decode()
+        ```
+      </TabItem>
+      <TabItem label="Shell">
+        ```bash
+        METADATA='order-67651'
+        TOKEN=$(printf '%s' "$METADATA.$PONCHOPAY_INTEGRATION_KEY" \
+          | openssl dgst -sha256 -binary | base64)
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>
+
+## Management JWT
+
+<ApiColumns>
+  Validate location, and the endpoints that change existing payments and recurring payments,
+  expect a short-lived
+  [JSON Web Token](https://datatracker.ietf.org/doc/html/rfc7519) in the `Authorization` header:
+
+  ```http
+  Authorization: Bearer <jwt>
+  ```
+
+  Sign it with **HS256**, using the raw SHA-256 digest of your integration key as the secret. Its
+  payload has these claims:
+
+  <Fields schema="JwtClaims" />
+
+  Create a new token for each request, right before you send it, from the exact body you'll send.
+  If you change the body after signing, `sig` won't match.
+
+  ### Example token
+
+  This is an example of a management JWT. It's for checking only: demo and production reject it.
+
+  ```txt
+  eyJhbGciOiJIUzI1NiJ9.eyJ1cm4iOiJJVVhmWUV3YyIsImVtYWlsIjoiaGVscEBwb25jaG9wYXkuY29tIiwic2lnIjoiZ3k5NFl6UWlyY2R6bGY1aEljWUJabmRkVldRZmpwOXNCWVRlL0x1b3lRYz0iLCJpYXQiOjE3NDQ3OTMwNjUsImV4cCI6MTc0NDc5MzA3MH0.jKhrWDOKKJkmaG3b2hf0f-dfHWcohyndsI340X4JjxI
+  ```
+
+  ### Check a token with jwt.io
+
+  1. Paste the token into the **Encoded value** box on [jwt.io](https://jwt.io). The **Decoded
+     header** and **Decoded payload** show what's inside, but the token isn't validated yet.
+  2. To validate it, paste the encoded hashed key into **JWT signature verification**. For the
+     example token above it's `nmlPGFX7EQ0kI16vPP0GUZUL9I2ZfR2ebZtam0ZB36U`. For your own tokens,
+     SHA-256 hash your integration key and base64url-encode the result.
+  3. Set **Encoding format** to `base64url`. jwt.io should show the token as valid with its
+     signature verified:
+
+  <Image src={jwtIoCheck} alt="jwt.io showing the example token decoded, with Valid JWT and Signature Verified, the secret pasted in and the encoding format set to base64url" />
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { createJWT } from '@ponchopay/pp-nodejs';
+
+        const body = JSON.stringify({ amount: 1000 }); // '' for requests with no body
+        const jwt = await createJWT(
+          'INTTEST',                              // urn
+          process.env.PONCHOPAY_INTEGRATION_KEY,  // integration key
+          'admin@club.example.com',               // email
+          body,
+        );
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use function PonchoPay\createJWT;
+
+        $body = json_encode(['amount' => 1000]); // '' for requests with no body
+        $jwt = createJWT(
+            'INTTEST',                              // urn
+            getenv('PONCHOPAY_INTEGRATION_KEY'),    // integration key
+            'admin@club.example.com',               // email
+            $body,
+        );
+        ```
+      </TabItem>
+      <TabItem label="Python">
+        ```python
+        import base64, hashlib, json, os, time
+        import jwt  # PyJWT
+
+        key = os.environ["PONCHOPAY_INTEGRATION_KEY"]
+        body = json.dumps({"amount": 1000}, separators=(",", ":"))  # "" for requests with no body
+        now = int(time.time())
+
+        token = jwt.encode(
+            {
+                "urn": "INTTEST",
+                "email": "admin@club.example.com",
+                "sig": base64.b64encode(hashlib.sha256(body.encode()).digest()).decode(),
+                "iat": now,
+                "exp": now + 5,
+            },
+            hashlib.sha256(key.encode("utf-8")).digest(),
+            algorithm="HS256",
+        )
+        ```
+      </TabItem>
+    </Tabs>
+
+    <Example
+      schema="JwtClaims"
+      title="Example JWT payload for the body above"
+      overrides={{ sig: 'YSYS0gj7YY6ysAfSp/jXoc+1EVMjiSmPHMMzIsMJS8w=' }}
+    />
+  </Fragment>
+</ApiColumns>
+
+## Webhook signatures
+
+<ApiColumns>
+  Every webhook has a `signature` header: the HMAC-SHA256 of the raw request body, using your
+  integration key, encoded as URL-safe Base64 without padding. Check it before you trust the body.
+
+  See [verify and handle webhooks](/webhooks/overview/#verify-and-handle-webhooks) for code in
+  each language.
+
+  <Fragment slot="code">
+    ```txt
+    signature = base64url( hmac_sha256( key = integrationKey, message = rawBody ) )
+    ```
+  </Fragment>
+</ApiColumns>

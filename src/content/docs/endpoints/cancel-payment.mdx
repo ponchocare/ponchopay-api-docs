@@ -1,0 +1,112 @@
+---
+title: Cancel a payment
+description: Cancel a payment so the parent can no longer pay it.
+tableOfContents: false
+sidebar:
+  label: Cancel payment
+  order: 6
+  badge:
+    text: PUT
+    variant: caution
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Endpoint from '../../../components/Endpoint.astro';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+
+<ApiColumns>
+  Cancels a payment so the parent can no longer pay it, for example when a booking is cancelled
+  before the parent has paid. To give money back on a payment that's been paid, use
+  [Refund a payment method](/endpoints/refund-payment-method/).
+
+  PonchoPay sends [`payment_cancelled`](/webhooks/events/payment-cancelled/) after the change. If
+  the parent hadn't selected a payment method yet, its `payment_methods` is empty and `method` is
+  `ponchopay`.
+
+  <Fragment slot="code">
+    <Endpoint method="PUT" path="/api/payment/{id}/cancel" />
+  </Fragment>
+</ApiColumns>
+
+## Authentication
+
+<ApiColumns>
+  Send a [management JWT](/getting-started/authentication/#management-jwt) in the `Authorization`
+  header. There's no body, so `sig` is the hash of an empty string. The SDKs build the token for
+  you.
+
+  <Fragment slot="code">
+    ```http
+    PUT /api/payment/{id}/cancel
+    Authorization: Bearer <jwt>
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Parameters
+
+<ApiColumns>
+  <Fields schema="PaymentPath" />
+
+  This endpoint has no body.
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Node.js">
+        ```ts
+        import { Client } from '@ponchopay/pp-nodejs';
+
+        const client = new Client(process.env.PONCHOPAY_INTEGRATION_KEY);
+        // Demo: new Client(key, 'https://demo.ponchopay.com/')
+
+        await client.cancelPayment('e2f4a6c8-0b1d-4e3f-9a5c-7d9e1b3c5f84', {
+          urn: 'INTTEST',
+          email: 'admin@club.example.com',
+        });
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        use PonchoPay\Client;
+
+        $client = new Client(getenv('PONCHOPAY_INTEGRATION_KEY'));
+        // Demo: new Client($key, 'https://demo.ponchopay.com/')
+
+        $client->cancelPayment('e2f4a6c8-0b1d-4e3f-9a5c-7d9e1b3c5f84', [
+            'urn' => 'INTTEST',
+            'email' => 'admin@club.example.com',
+        ]);
+        ```
+      </TabItem>
+      <TabItem label="cURL">
+        ```bash
+        # $JWT: a management JWT signed over an empty body
+        curl -X PUT https://demo.ponchopay.com/api/payment/e2f4a6c8-0b1d-4e3f-9a5c-7d9e1b3c5f84/cancel \
+          -H "Authorization: Bearer $JWT"
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>
+
+## Returns
+
+<ApiColumns>
+  **`204 No Content`**: the payment was cancelled.
+
+  **`400 Bad Request`**: the payment couldn't be cancelled.
+
+  A payment that has already taken money (a card charge or a Tax-Free Childcare payment reference)
+  or is in bank can't be cancelled, and the request fails. An unknown payment ID returns `404`.
+  Requests with an invalid or expired token, or for a payment that isn't at one of the provider's
+  locations, are rejected.
+
+  <Fragment slot="code">
+    ```http title="Response"
+    HTTP/1.1 204 No Content
+    ```
+  </Fragment>
+</ApiColumns>

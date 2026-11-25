@@ -1,0 +1,92 @@
+---
+title: Subscription set up
+description: Where PonchoPay sends the parent when they finish setting up a recurring payment, and what it posts to your site.
+tableOfContents: false
+sidebar:
+  order: 2
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import ApiColumns from '../../../components/ApiColumns.astro';
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+<ApiColumns>
+  Sent when the recurring payment (subscription) is fully set up: the parent has taken all the
+  necessary actions to make sure it will be able to generate payments.
+
+  PonchoPay sends the parent's browser back to your **Subscription set up** redirect URL, set in
+  **Settings → API integration**, with a form `POST`. Show them a confirmation page, or redirect
+  them on.
+
+  <Aside type="caution" title="Not proof of payment">
+    A redirect comes from the parent's browser and isn't signed, so anyone could send one. Use it to
+    show the parent what happens next, and rely on the
+    [`recurring_payment_set_up`](/webhooks/events/recurring-payment-set-up/) webhook to update your system.
+  </Aside>
+
+  <Fragment slot="code">
+    ```http title="Request to your site"
+    POST /your/redirect/url HTTP/1.1
+    Content-Type: application/x-www-form-urlencoded
+    ```
+  </Fragment>
+</ApiColumns>
+
+## Form fields
+
+<ApiColumns>
+  The body is a **SubscriptionSetUp** object, sent by PonchoPay when a recurring payment is successfully set up. It's form-encoded
+  (`application/x-www-form-urlencoded`) with these fields:
+
+  <Fields schema="RedirectBody" />
+
+  <Fragment slot="code">
+    <Example schema="RedirectBody" title="Body" format="form" overrides={{ metadata: 'membership-2291' }} />
+  </Fragment>
+</ApiColumns>
+
+## Handle the redirect
+
+<ApiColumns>
+  Read `metadata` to find the recurring payment in your system and show the parent its status. If
+  `provider_redirect` is present, send the parent on to it when you're done, but only if it matches
+  the redirect URL you hold for that provider. The form isn't signed, so an unchecked value would let
+  anyone use your site to redirect people elsewhere.
+
+  PonchoPay doesn't need a response, but the parent sees whatever you return, so return a page or a
+  redirect.
+
+  <Fragment slot="code">
+    <Tabs syncKey="lang">
+      <TabItem label="Express">
+        ```js
+        app.post('/ponchopay/subscription-set-up', express.urlencoded({ extended: false }), (req, res) => {
+          const { metadata, provider_redirect } = req.body;
+
+          // Look up by metadata to show status. Don't mark it active here: wait for the webhook.
+          if (provider_redirect && isKnownProviderUrl(provider_redirect)) {
+            return res.redirect(303, provider_redirect);
+          }
+          res.redirect(303, `/memberships/${encodeURIComponent(metadata)}`);
+        });
+        ```
+      </TabItem>
+      <TabItem label="PHP">
+        ```php
+        <?php
+
+        $metadata = $_POST['metadata'] ?? '';
+        $providerRedirect = $_POST['provider_redirect'] ?? null;
+
+        // Look up by metadata to show status. Don't mark it active here: wait for the webhook.
+        if ($providerRedirect && isKnownProviderUrl($providerRedirect)) {
+            header('Location: ' . $providerRedirect, true, 303);
+            exit;
+        }
+        header('Location: /memberships/' . rawurlencode($metadata), true, 303);
+        ```
+      </TabItem>
+    </Tabs>
+  </Fragment>
+</ApiColumns>

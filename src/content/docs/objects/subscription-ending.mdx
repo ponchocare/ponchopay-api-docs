@@ -1,0 +1,15 @@
+---
+title: SubscriptionEnding
+description: When a recurring payment stops taking payments.
+---
+
+import Fields from '../../../components/Fields.astro';
+import Example from '../../../components/Example.astro';
+
+When a recurring payment stops. Send it as `ending` when you [initiate a subscription](/endpoints/initiate-subscription/). Leave it out and the recurring payment carries on until it's [cancelled](/endpoints/cancel-subscription/). Which fields you need depends on `condition`.
+
+<Fields schema="SubscriptionEnding" />
+
+## Example
+
+<Example schema="SubscriptionEnding" />

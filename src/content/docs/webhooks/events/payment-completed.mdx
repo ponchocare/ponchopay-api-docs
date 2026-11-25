@@ -1,0 +1,87 @@
+---
+title: Payment completed
+description: "The payment_completed webhook. Sent when the parent has done everything needed for the payment to be taken from the payment method they chose (for Standard Tax-Free Childcare and vouchers on the current lifecycle, once PonchoPay confirms the money is in the provider's bank)."
+tableOfContents: false
+sidebar:
+  order: 3
+---
+
+{/* Generated from one template; keep the structure the same across event pages. */}
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+import Event from '../../../../components/Event.astro';
+import ApiColumns from '../../../../components/ApiColumns.astro';
+import Fields from '../../../../components/Fields.astro';
+import Example from '../../../../components/Example.astro';
+import WebhookHandler from '../../../../partials/WebhookHandler.mdx';
+
+<ApiColumns>
+  Sent when the parent has done everything needed for the payment to be taken (for Standard Tax-Free
+  Childcare and vouchers, once PonchoPay confirms the money is in the provider's bank). This is usually the
+  event to act on: mark the order as paid, confirm the booking, or send your own receipt.
+
+  - **Card, Pay by Bank or Express Tax-Free Childcare payments**: as soon as checkout finishes and
+    the funds are captured.
+    [`payment_captured`](/webhooks/events/payment-captured/) is sent at the same time.
+  - **Offline payments, such as Standard Tax-Free Childcare or childcare vouchers**: once PonchoPay
+    has confirmed the payment is in the provider's bank. This can be 2 or more days after checkout, because of voucher providers'
+    payment terms.
+
+  <Aside title="Parents paying outside PonchoPay">
+    With Standard Tax-Free Childcare and childcare vouchers, the parent pays on the government's or
+    voucher provider's site. When they tell PonchoPay they've paid, you get
+    [`payment_reported_complete`](/webhooks/events/payment-reported-complete/). That's the parent's
+    claim, backed by the card they left as a guarantee if payment guarantee is turned on.
+    `payment_completed` only follows once the
+    money is confirmed.
+  </Aside>
+
+  Integrations on the [legacy lifecycle](/webhooks/overview/#payment-lifecycle) (set up before 25 April
+  2025) get no `payment_reported_complete`: their `payment_completed` is sent when the parent reports
+  the payment.
+
+  <Fragment slot="code">
+    <Event name="payment_completed" setting="Payment completed" />
+  </Fragment>
+</ApiColumns>
+
+## The event
+
+<ApiColumns>
+  PonchoPay sends a `POST` with the [standard headers](/webhooks/overview/#request-format) and a
+  [PaymentCallback](/objects/payment-callback/) body, with `event` set to `payment_completed`:
+
+  <Fields schema="PaymentCallback" />
+
+  <Fragment slot="code">
+    <Example schema="PaymentCallback" title="Example body" overrides={{ event: 'payment_completed', id: '2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d62', date: '2026-11-24T10:15:31.000Z' }} />
+    The values are examples. `request.metadata` is the `metadata` you sent when you created the
+    payment.
+  </Fragment>
+</ApiColumns>
+
+## Handle the webhook
+
+<WebhookHandler />
+
+## Test it
+
+<ApiColumns>
+  1. On the demo environment, [initiate a payment](/endpoints/initiate-payment/) and pay with a
+     [test card](/getting-started/testing/#test-cards). `payment_completed` is sent as soon as
+     checkout finishes.
+  2. For Standard Tax-Free Childcare or vouchers, report the payment as complete in checkout, then
+     use **Mark in bank** on the
+     [demo payments page](https://demo.ponchopay.com/provider/admin/payments) (available when
+     reconciliation is turned on).
+
+  See [Testing](/getting-started/testing/#trigger-webhooks) for how to set your webhook URL on demo.
+
+  <Fragment slot="code">
+    <LinkCard
+      title="Webhooks overview"
+      description="How this event fits into the payment lifecycle, and every other event."
+      href="/webhooks/overview/"
+    />
+  </Fragment>
+</ApiColumns>

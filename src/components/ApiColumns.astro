@@ -1,0 +1,55 @@
+---
+/**
+ * Stripe-style two-column section: explanation and parameters on the left, code that stays in
+ * view on the right. Stacks into one column on narrower screens.
+ *
+ * <ApiColumns>
+ *   ...parameters...
+ *   <Fragment slot="code">...code examples...</Fragment>
+ * </ApiColumns>
+ */
+---
+
+<div class="pp-columns">
+  <div class="pp-columns__main">
+    <slot />
+  </div>
+  <aside class="pp-columns__code" aria-label="Examples">
+    <div class="pp-columns__sticky">
+      <slot name="code" />
+    </div>
+  </aside>
+</div>
+
+<style is:global>
+  /* Pages with API columns use the full width (they hide the "On this page" sidebar). */
+  .main-pane:has(.pp-columns) {
+    --sl-content-width: 76rem;
+  }
+
+  .pp-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .pp-columns__main > :first-child,
+  .pp-columns__sticky > :first-child {
+    margin-top: 0;
+  }
+
+  @media (min-width: 72rem) {
+    .pp-columns {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 3rem;
+      align-items: start;
+    }
+    .pp-columns__code {
+      align-self: stretch;
+    }
+    .pp-columns__sticky {
+      position: sticky;
+      top: calc(var(--sl-nav-height) + 1.5rem);
+    }
+  }
+</style>
